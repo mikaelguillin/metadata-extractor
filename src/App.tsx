@@ -256,7 +256,7 @@ export const App: React.FC = () => {
       setStatus(`PDF chargé (${doc.numPages} pages). Extraction du texte…`);
 
       const pages = await extractTextItems(doc);
-      setStatus(`Texte extrait. Construction des séances…`);
+      setStatus(`Texte extrait. Construction des documents…`);
 
       const sessions = buildSessions(
         pages.map((p) => ({
@@ -266,7 +266,7 @@ export const App: React.FC = () => {
       );
 
       persist(sessions);
-      setStatus(`Terminé. ${sessions.length} séance(s) détectée(s).`);
+      setStatus(`Terminé. ${sessions.length} document(s) détectée(s).`);
     } catch (err) {
       console.error(err);
       setStatus("Erreur lors du traitement du PDF.");
@@ -293,7 +293,7 @@ export const App: React.FC = () => {
           <div>
             <div className="title">Analyseur de PDF</div>
             <div className="subtitle">
-              Trie les éléments par colonnes, détecte les séances et persiste le résultat.
+              Détecte les documents et persiste le résultat.
             </div>
           </div>
           <div className="controls">
@@ -321,15 +321,13 @@ export const App: React.FC = () => {
         <div className="table-wrapper">
           {entries.length === 0 ? (
             <div className="empty">
-              Aucune entrée pour l&apos;instant. Chargez un PDF 2 colonnes contenant des
-              intitulés de type &laquo; 3ème séance &raquo; suivis d&apos;une date en français.
+              Aucune entrée pour l'instant. Chargez un PDF contenant une table des matières pour commencer.
             </div>
           ) : (
             <table>
               <thead>
                 <tr>
-                  <th>Page</th>
-                  <th>Séance</th>
+                  <th>Document</th>
                   <th>Date</th>
                   <th>Description</th>
                   <th />
@@ -338,7 +336,6 @@ export const App: React.FC = () => {
               <tbody>
                 {entries.map((entry) => (
                   <tr key={entry.id}>
-                    <td className="col-page">{entry.page}</td>
                     <td className="col-title">{entry.sessionLabel}</td>
                     <td className="col-date">{entry.dateText}</td>
                     <td className="col-description">{entry.description}</td>
