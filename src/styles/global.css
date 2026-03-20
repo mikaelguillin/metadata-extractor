@@ -252,82 +252,97 @@ body {
   background: rgba(15, 23, 42, 0.95);
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.85rem;
+.sessions-list {
+  list-style: none;
+  margin: 0;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-thead {
-  position: sticky;
-  top: 0;
-  background: rgba(15, 23, 42, 0.98);
-  box-shadow: 0 1px 0 rgba(31, 41, 55, 0.9);
-  z-index: 1;
+.session-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(55, 65, 81, 0.85);
+  background: rgba(15, 23, 42, 0.55);
 }
 
-th,
-td {
-  padding: 8px 10px;
-  text-align: left;
+.session-card:nth-child(even) {
+  background: rgba(15, 23, 42, 0.72);
 }
 
-th {
+.session-card:hover {
+  border-color: rgba(96, 165, 250, 0.28);
+}
+
+.session-card-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.session-doc-title {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #f1f5f9;
+}
+
+.session-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.session-field-label {
+  font-size: 0.72rem;
   font-weight: 500;
-  font-size: 0.78rem;
-  color: #9ca3af;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  color: #9ca3af;
 }
 
-tbody tr:nth-child(even) {
-  background: rgba(15, 23, 42, 0.8);
-}
-
-tbody tr:hover {
-  background: rgba(30, 64, 175, 0.18);
-}
-
-.col-date {
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-
-.col-title {
-  font-weight: 500;
-}
-
-.col-description {
-  max-width: 500px;
-  white-space: pre-wrap;
-}
-
-.table-cell-input {
+.session-field-input {
   width: 100%;
-  min-width: 6rem;
   box-sizing: border-box;
-  padding: 6px 8px;
+  padding: 8px 10px;
   font: inherit;
   font-size: 0.85rem;
   color: #e5e7eb;
   background: rgba(30, 41, 59, 0.9);
   border: 1px solid rgba(55, 65, 81, 0.9);
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
-.table-cell-input:focus {
+.session-field-input:focus {
   outline: none;
   border-color: rgba(96, 165, 250, 0.65);
   box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.35);
 }
 
-.table-cell-textarea {
+.session-field-input[type="text"] {
+  font-variant-numeric: tabular-nums;
+}
+
+.session-field-textarea {
   display: block;
-  min-height: 2.75rem;
+  min-height: 5.5rem;
   resize: vertical;
   max-width: 100%;
   white-space: pre-wrap;
-  line-height: 1.35;
+  line-height: 1.45;
+}
+
+.session-card-actions {
+  flex-shrink: 0;
+  padding-top: 2px;
 }
 
 .badge {
@@ -372,8 +387,16 @@ tbody tr:hover {
     flex-direction: column;
     align-items: flex-start;
   }
+}
 
-  .col-description {
-    max-width: 260px;
+@media (max-width: 520px) {
+  .session-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .session-card-actions {
+    align-self: flex-end;
+    padding-top: 0;
   }
 }

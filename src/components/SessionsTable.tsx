@@ -93,43 +93,58 @@ function SessionRow({
     onUpdateEntry,
   ]);
 
+  const dateId = `session-date-${entry.id}`;
+  const descId = `session-desc-${entry.id}`;
+
   return (
-    <tr>
-      <td className="col-title">{entry.sessionLabel}</td>
-      <td className="col-date">
-        <input
-          className="table-cell-input"
-          type="text"
-          value={dateText}
-          onChange={(e) => {
-            setDateText(e.target.value);
-            scheduleSave();
-          }}
-          onBlur={handleBlur}
-          aria-label={`Date — ${entry.sessionLabel}`}
-        />
-      </td>
-      <td className="col-description">
-        <textarea
-          className="table-cell-input table-cell-textarea"
-          value={description}
-          onChange={(e) => {
-            setDescription(e.target.value);
-            scheduleSave();
-          }}
-          onBlur={handleBlur}
-          rows={2}
-          aria-label={`Description — ${entry.sessionLabel}`}
-          spellCheck="true"
-          lang="fr"
-        />
-      </td>
-      <td>
-        <button type="button" className="button" onClick={() => onDelete(entry.id)}>
+    <li className="session-card">
+      <div className="session-card-main">
+        <p className="session-doc-title">{entry.sessionLabel}</p>
+        <div className="session-field">
+          <label className="session-field-label" htmlFor={dateId}>
+            Date
+          </label>
+          <input
+            id={dateId}
+            className="session-field-input"
+            type="text"
+            value={dateText}
+            onChange={(e) => {
+              setDateText(e.target.value);
+              scheduleSave();
+            }}
+            onBlur={handleBlur}
+          />
+        </div>
+        <div className="session-field">
+          <label className="session-field-label" htmlFor={descId}>
+            Description
+          </label>
+          <textarea
+            id={descId}
+            className="session-field-input session-field-textarea"
+            value={description}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              scheduleSave();
+            }}
+            onBlur={handleBlur}
+            rows={10}
+            spellCheck="true"
+            lang="fr"
+          />
+        </div>
+      </div>
+      <div className="session-card-actions">
+        <button
+          type="button"
+          className="button danger"
+          onClick={() => onDelete(entry.id)}
+        >
           Delete
         </button>
-      </td>
-    </tr>
+      </div>
+    </li>
   );
 }
 
@@ -144,25 +159,15 @@ export function SessionsTable({
   }
 
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>Document</th>
-          <th>Date</th>
-          <th>Description</th>
-          <th />
-        </tr>
-      </thead>
-      <tbody>
-        {entries.map((entry) => (
-          <SessionRow
-            key={entry.id}
-            entry={entry}
-            onDelete={onDelete}
-            onUpdateEntry={onUpdateEntry}
-          />
-        ))}
-      </tbody>
-    </table>
+    <ul className="sessions-list" aria-label="Extracted documents">
+      {entries.map((entry) => (
+        <SessionRow
+          key={entry.id}
+          entry={entry}
+          onDelete={onDelete}
+          onUpdateEntry={onUpdateEntry}
+        />
+      ))}
+    </ul>
   );
 }
