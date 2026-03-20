@@ -14,6 +14,7 @@ This is a minimal React + TypeScript web app that parses 2‑column PDFs using `
 - Stateful parsing:
   - A **new entry** starts when a line matches `"[Number]ème séance"` and the **next line** is a French date.
   - Everything after the date up to the next séance is the **description**.
+- Each entry stores the **leading session number** from the séance line (e.g. `278ÈME SÉANCE` → `278`), editable like date and description.
 - Results are persisted in `localStorage` and displayed in a table with:
   - Per-row **Delete** button.
   - **Clear All** button.

@@ -168,7 +168,10 @@ export const App: React.FC = () => {
 
   const handleUpdateEntry = (
     id: string,
-    updates: Pick<SessionEntry, "dateText" | "description">,
+    updates: Pick<
+      SessionEntry,
+      "sessionNumber" | "dateText" | "description"
+    >,
   ) => {
     if (!selectedBookId) return;
     const next = (selectedBook?.entries ?? []).map((entry) =>

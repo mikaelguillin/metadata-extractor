@@ -14,7 +14,10 @@ type SessionsTableProps = {
   onDelete: (id: string) => void;
   onUpdateEntry: (
     id: string,
-    updates: Pick<SessionEntry, "dateText" | "description">,
+    updates: Pick<
+      SessionEntry,
+      "sessionNumber" | "dateText" | "description"
+    >,
   ) => void;
 };
 
@@ -27,20 +30,24 @@ function SessionRow({
   onDelete: (id: string) => void;
   onUpdateEntry: SessionsTableProps["onUpdateEntry"];
 }) {
+  const [sessionNumber, setSessionNumber] = useState(entry.sessionNumber);
   const [dateText, setDateText] = useState(entry.dateText);
   const [description, setDescription] = useState(entry.description);
 
+  const sessionNumberRef = useRef(sessionNumber);
   const dateRef = useRef(dateText);
   const descriptionRef = useRef(description);
+  sessionNumberRef.current = sessionNumber;
   dateRef.current = dateText;
   descriptionRef.current = description;
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    setSessionNumber(entry.sessionNumber);
     setDateText(entry.dateText);
     setDescription(entry.description);
-  }, [entry.id, entry.dateText, entry.description]);
+  }, [entry.id, entry.sessionNumber, entry.dateText, entry.description]);
 
   useEffect(
     () => () => {
@@ -60,13 +67,24 @@ function SessionRow({
     flushDebouncedSave();
     debounceRef.current = setTimeout(() => {
       debounceRef.current = null;
+      const num = sessionNumberRef.current.trim();
       const d = dateRef.current.trim();
       const desc = descriptionRef.current.trim();
-      if (!d || !desc) return;
-      if (d === entry.dateText && desc === entry.description) return;
-      onUpdateEntry(entry.id, { dateText: d, description: desc });
+      if (!num || !d || !desc) return;
+      if (
+        num === entry.sessionNumber &&
+        d === entry.dateText &&
+        desc === entry.description
+      )
+        return;
+      onUpdateEntry(entry.id, {
+        sessionNumber: num,
+        dateText: d,
+        description: desc,
+      });
     }, SAVE_DEBOUNCE_MS);
   }, [
+    entry.sessionNumber,
     entry.dateText,
     entry.description,
     entry.id,
@@ -76,16 +94,28 @@ function SessionRow({
 
   const handleBlur = useCallback(() => {
     flushDebouncedSave();
+    const num = sessionNumberRef.current.trim();
     const d = dateRef.current.trim();
     const desc = descriptionRef.current.trim();
-    if (!d || !desc) {
+    if (!num || !d || !desc) {
+      setSessionNumber(entry.sessionNumber);
       setDateText(entry.dateText);
       setDescription(entry.description);
       return;
     }
-    if (d === entry.dateText && desc === entry.description) return;
-    onUpdateEntry(entry.id, { dateText: d, description: desc });
+    if (
+      num === entry.sessionNumber &&
+      d === entry.dateText &&
+      desc === entry.description
+    )
+      return;
+    onUpdateEntry(entry.id, {
+      sessionNumber: num,
+      dateText: d,
+      description: desc,
+    });
   }, [
+    entry.sessionNumber,
     entry.dateText,
     entry.description,
     entry.id,
@@ -93,13 +123,31 @@ function SessionRow({
     onUpdateEntry,
   ]);
 
+  const sessionNoId = `session-no-${entry.id}`;
   const dateId = `session-date-${entry.id}`;
   const descId = `session-desc-${entry.id}`;
 
   return (
     <li className="session-card">
       <div className="session-card-main">
-        <p className="session-doc-title">{entry.sessionLabel}</p>
+        <div className="session-field">
+          <label className="session-field-label" htmlFor={sessionNoId}>
+            Session no.
+          </label>
+          <input
+            id={sessionNoId}
+            className="session-field-input monospace"
+            type="text"
+            inputMode="numeric"
+            value={sessionNumber}
+            onChange={(e) => {
+              setSessionNumber(e.target.value);
+              scheduleSave();
+            }}
+            onBlur={handleBlur}
+            spellCheck="false"
+          />
+        </div>
         <div className="session-field">
           <label className="session-field-label" htmlFor={dateId}>
             Date

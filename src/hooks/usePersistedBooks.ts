@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { extractSessionNumber } from "../lib/sessions/lineHeuristics";
 import type { Book } from "../types/book";
+import type { SessionEntry } from "../types/session";
 
 const STORAGE_KEY = "metadataExtractorBooks";
 
@@ -31,6 +33,17 @@ export function usePersistedBooks() {
         ...b,
         tocPageStart: b.tocPageStart ?? null,
         tocPageEnd: b.tocPageEnd ?? null,
+        entries: (b.entries ?? []).map((e) => {
+          const legacy = e as SessionEntry & { sessionLabel?: string };
+          const sessionNumber =
+            legacy.sessionNumber ??
+            (legacy.sessionLabel != null
+              ? extractSessionNumber(legacy.sessionLabel) ||
+                String(legacy.sessionLabel).trim()
+              : "");
+          const { sessionLabel: _omit, ...rest } = legacy;
+          return { ...rest, sessionNumber };
+        }),
       }));
       const next: PersistedState = {
         books,

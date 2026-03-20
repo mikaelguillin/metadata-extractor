@@ -1,7 +1,7 @@
 export type SessionEntry = {
   id: string;
   page: number;
-  sessionLabel: string;
+  sessionNumber: string;
   dateText: string;
   description: string;
 };

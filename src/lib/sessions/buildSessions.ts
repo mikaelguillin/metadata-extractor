@@ -7,6 +7,7 @@ import {
   isFrenchDate,
   stripFrenchTimeFromDate,
   stripTrailingTocLeaders,
+  extractSessionNumber,
 } from "./lineHeuristics";
 
 export function buildSessions(
@@ -17,17 +18,17 @@ export function buildSessions(
 ): SessionEntry[] {
   const sessions: SessionEntry[] = [];
 
-  let currentSessionLabel: string | null = null;
+  let currentSessionNumber: string | null = null;
   let currentDate: string | null = null;
   let currentPage = 0;
   let currentDescription: string[] = [];
 
   const flush = () => {
-    if (currentSessionLabel && currentDate) {
+    if (currentSessionNumber && currentDate) {
       sessions.push({
         id: `${currentPage}-${sessions.length}-${Date.now()}`,
         page: currentPage,
-        sessionLabel: currentSessionLabel,
+        sessionNumber: currentSessionNumber,
         dateText: currentDate,
         description: currentDescription
           .filter((line) => !isFrenchDate(line))
@@ -35,7 +36,7 @@ export function buildSessions(
           .trim(),
       });
     }
-    currentSessionLabel = null;
+    currentSessionNumber = null;
     currentDate = null;
     currentDescription = [];
   };
@@ -77,7 +78,8 @@ export function buildSessions(
         (isFrenchDate(nextLine) || isFrenchDate(prevLine))
       ) {
         flush();
-        currentSessionLabel = line;
+        const n = extractSessionNumber(line);
+        currentSessionNumber = n.length > 0 ? n : line.trim();
         const rawDate = isFrenchDate(nextLine) ? nextLine : prevLine;
         currentDate = stripFrenchTimeFromDate(rawDate);
         currentPage = page.page;
@@ -87,7 +89,7 @@ export function buildSessions(
         continue;
       }
 
-      if (currentSessionLabel && currentDate) {
+      if (currentSessionNumber && currentDate) {
         currentDescription.push(stripTrailingTocLeaders(line));
       }
     }

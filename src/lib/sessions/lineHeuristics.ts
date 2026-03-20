@@ -38,6 +38,12 @@ export function isSessionLine(text: string): boolean {
   return /^\d+$/.test(compact.substring(0, 2));
 }
 
+/** Leading session ordinal from a TOC line, e.g. "278ÈME SÉANCE" → "278". */
+export function extractSessionNumber(text: string): string {
+  const m = text.trim().match(/^(\d+)/);
+  return m?.[1] ?? "";
+}
+
 /** Strip TOC-style leaders from the end of a line (4+ dots then any trailing tail). */
 export function stripTrailingTocLeaders(text: string): string {
   return text.replace(/(\.\s | \.){4,}.*$/, "").trimEnd();
