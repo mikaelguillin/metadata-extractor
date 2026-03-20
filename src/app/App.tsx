@@ -8,6 +8,7 @@ import { SessionsTable } from "../components/SessionsTable";
 import { usePersistedBooks } from "../hooks/usePersistedBooks";
 import { extractTextItems } from "../lib/pdf/extractTextItems";
 import { buildSessions } from "../lib/sessions/buildSessions";
+import type { SessionEntry } from "../types/session";
 
 export const App: React.FC = () => {
   const {
@@ -24,7 +25,9 @@ export const App: React.FC = () => {
 
   const uploadDisabled = !selectedBookId;
 
-  const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async (e) => {
+  const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async (
+    e,
+  ) => {
     const file = e.target.files?.[0];
     if (!file || !selectedBookId) return;
 
@@ -44,7 +47,7 @@ export const App: React.FC = () => {
         pages.map((p) => ({
           page: p.page,
           items: p.items,
-        }))
+        })),
       );
 
       patchBook(selectedBookId, {
@@ -63,11 +66,25 @@ export const App: React.FC = () => {
 
   const handleDeleteEntry = (id: string) => {
     if (!selectedBookId) return;
-    const next = (selectedBook?.entries ?? []).filter((entry) => entry.id !== id);
+    const next = (selectedBook?.entries ?? []).filter(
+      (entry) => entry.id !== id,
+    );
     patchBook(selectedBookId, {
       entries: next,
-      pdfFileName: next.length === 0 ? null : selectedBook?.pdfFileName ?? null,
+      pdfFileName:
+        next.length === 0 ? null : (selectedBook?.pdfFileName ?? null),
     });
+  };
+
+  const handleUpdateEntry = (
+    id: string,
+    updates: Pick<SessionEntry, "dateText" | "description">,
+  ) => {
+    if (!selectedBookId) return;
+    const next = (selectedBook?.entries ?? []).map((entry) =>
+      entry.id === id ? { ...entry, ...updates } : entry,
+    );
+    patchBook(selectedBookId, { entries: next });
   };
 
   const handleClearAll = () => {
@@ -77,12 +94,11 @@ export const App: React.FC = () => {
   };
 
   const entries = selectedBook?.entries ?? [];
-  const emptyTableMessage =
-    !selectedBookId
-      ? "Sélectionnez un livre dans la liste."
-      : !selectedBook?.pdfFileName
-        ? "Chargez un PDF pour ce livre (une table des matières donne de meilleurs résultats)."
-        : "Aucun document détecté dans ce PDF.";
+  const emptyTableMessage = !selectedBookId
+    ? "Sélectionnez un livre dans la liste."
+    : !selectedBook?.pdfFileName
+      ? "Chargez un PDF pour ce livre (une table des matières donne de meilleurs résultats)."
+      : "Aucun document détecté dans ce PDF.";
 
   return (
     <div className="app">
@@ -110,6 +126,7 @@ export const App: React.FC = () => {
               entries={entries}
               emptyMessage={emptyTableMessage}
               onDelete={handleDeleteEntry}
+              onUpdateEntry={handleUpdateEntry}
             />
           </div>
         </div>

@@ -12,7 +12,7 @@ export function buildSessions(
   pages: {
     page: number;
     items: FlatTextItem[];
-  }[]
+  }[],
 ): SessionEntry[] {
   const sessions: SessionEntry[] = [];
 

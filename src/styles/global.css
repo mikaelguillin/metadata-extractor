@@ -302,6 +302,34 @@ tbody tr:hover {
   white-space: pre-wrap;
 }
 
+.table-cell-input {
+  width: 100%;
+  min-width: 6rem;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  font: inherit;
+  font-size: 0.85rem;
+  color: #e5e7eb;
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(55, 65, 81, 0.9);
+  border-radius: 6px;
+}
+
+.table-cell-input:focus {
+  outline: none;
+  border-color: rgba(96, 165, 250, 0.65);
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.35);
+}
+
+.table-cell-textarea {
+  display: block;
+  min-height: 2.75rem;
+  resize: vertical;
+  max-width: 100%;
+  white-space: pre-wrap;
+  line-height: 1.35;
+}
+
 .badge {
   display: inline-flex;
   align-items: center;

@@ -9,7 +9,10 @@ export function compareReadingOrder(a: FlatTextItem, b: FlatTextItem): number {
   return b.y - a.y;
 }
 
-export function needsSpaceBetween(prev: FlatTextItem, next: FlatTextItem): boolean {
+export function needsSpaceBetween(
+  prev: FlatTextItem,
+  next: FlatTextItem,
+): boolean {
   const prevEnd = prev.x + prev.width;
   const gap = next.x - prevEnd;
   if (gap <= 0) return false;

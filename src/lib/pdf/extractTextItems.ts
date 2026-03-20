@@ -1,4 +1,8 @@
-import type { PDFDocumentProxy, TextItem, TextMarkedContent } from "pdfjs-dist/types/src/display/api";
+import type {
+  PDFDocumentProxy,
+  TextItem,
+  TextMarkedContent,
+} from "pdfjs-dist/types/src/display/api";
 import type { FlatTextItem } from "../../types/session";
 import { compareReadingOrder } from "../sessions/lineHeuristics";
 
@@ -9,7 +13,9 @@ export type PageTextItems = {
   items: FlatTextItem[];
 };
 
-export async function extractTextItems(doc: PDFDocumentProxy): Promise<PageTextItems[]> {
+export async function extractTextItems(
+  doc: PDFDocumentProxy,
+): Promise<PageTextItems[]> {
   const pages: PageTextItems[] = [];
 
   const numPages = doc.numPages;
@@ -37,8 +43,12 @@ export async function extractTextItems(doc: PDFDocumentProxy): Promise<PageTextI
 
     const halfWidth = viewport.width / 2;
 
-    const left = mapped.filter((i) => i.x < halfWidth).sort(compareReadingOrder);
-    const right = mapped.filter((i) => i.x >= halfWidth).sort(compareReadingOrder);
+    const left = mapped
+      .filter((i) => i.x < halfWidth)
+      .sort(compareReadingOrder);
+    const right = mapped
+      .filter((i) => i.x >= halfWidth)
+      .sort(compareReadingOrder);
 
     pages.push({
       page: pageNum,
