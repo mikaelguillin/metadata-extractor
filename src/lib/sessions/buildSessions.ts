@@ -5,6 +5,7 @@ import {
   isNoiseLine,
   isSessionLine,
   isFrenchDate,
+  stripTrailingTocLeaders,
 } from "./lineHeuristics";
 
 export function buildSessions(
@@ -85,7 +86,7 @@ export function buildSessions(
       }
 
       if (currentSessionLabel && currentDate) {
-        currentDescription.push(line);
+        currentDescription.push(stripTrailingTocLeaders(line));
       }
     }
   }

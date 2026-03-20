@@ -35,6 +35,11 @@ export function isSessionLine(text: string): boolean {
   return /^\d+$/.test(compact.substring(0, 2));
 }
 
+/** Strip TOC-style leaders from the end of a line (4+ dots then any trailing tail). */
+export function stripTrailingTocLeaders(text: string): string {
+  return text.replace(/(\.\s | \.){4,}.*$/, "").trimEnd();
+}
+
 export function isFrenchDate(text: string): boolean {
   const trimmed = text.trim();
   if (!trimmed) return false;
