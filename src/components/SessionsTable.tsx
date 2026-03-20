@@ -2,16 +2,13 @@ import type { SessionEntry } from "../types/session";
 
 type SessionsTableProps = {
   entries: SessionEntry[];
+  emptyMessage: string;
   onDelete: (id: string) => void;
 };
 
-export function SessionsTable({ entries, onDelete }: SessionsTableProps) {
+export function SessionsTable({ entries, emptyMessage, onDelete }: SessionsTableProps) {
   if (entries.length === 0) {
-    return (
-      <div className="empty">
-        Aucune entrée pour l'instant. Chargez un PDF contenant une table des matières pour commencer.
-      </div>
-    );
+    return <div className="empty">{emptyMessage}</div>;
   }
 
   return (
