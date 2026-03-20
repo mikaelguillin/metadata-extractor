@@ -55,3 +55,11 @@ export function isFrenchDate(text: string): boolean {
 
   return hasMonth && hasYear;
 }
+
+/** Drop clock time after the date, e.g. ", à 11 h. 30" or " à 11 h. 30". */
+export function stripFrenchTimeFromDate(text: string): string {
+  return text
+    .replace(/,\s*à\s+.+$/iu, "")
+    .replace(/\s+à\s+\d{1,2}\s*h\.?\s*\d{0,2}\s*$/iu, "")
+    .trim();
+}

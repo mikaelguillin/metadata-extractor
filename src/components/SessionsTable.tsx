@@ -114,6 +114,8 @@ function SessionRow({
               scheduleSave();
             }}
             onBlur={handleBlur}
+            spellCheck="true"
+            lang="fr"
           />
         </div>
         <div className="session-field">

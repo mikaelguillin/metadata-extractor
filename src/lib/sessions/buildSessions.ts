@@ -5,6 +5,7 @@ import {
   isNoiseLine,
   isSessionLine,
   isFrenchDate,
+  stripFrenchTimeFromDate,
   stripTrailingTocLeaders,
 } from "./lineHeuristics";
 
@@ -77,7 +78,8 @@ export function buildSessions(
       ) {
         flush();
         currentSessionLabel = line;
-        currentDate = isFrenchDate(nextLine) ? nextLine : prevLine;
+        const rawDate = isFrenchDate(nextLine) ? nextLine : prevLine;
+        currentDate = stripFrenchTimeFromDate(rawDate);
         currentPage = page.page;
         if (isFrenchDate(nextLine)) {
           i++;
