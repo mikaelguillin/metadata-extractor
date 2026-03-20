@@ -6,6 +6,11 @@ type AppHeaderProps = {
   status: string;
   loading: boolean;
   uploadDisabled: boolean;
+  tocStartInput: string;
+  tocEndInput: string;
+  onTocStartChange: React.ChangeEventHandler<HTMLInputElement>;
+  onTocEndChange: React.ChangeEventHandler<HTMLInputElement>;
+  tocRangeHint: string | null;
   onFileChange: React.ChangeEventHandler<HTMLInputElement>;
   onClearAll: () => void;
 };
@@ -16,6 +21,11 @@ export function AppHeader({
   status,
   loading,
   uploadDisabled,
+  tocStartInput,
+  tocEndInput,
+  onTocStartChange,
+  onTocEndChange,
+  tocRangeHint,
   onFileChange,
   onClearAll,
 }: AppHeaderProps) {
@@ -61,6 +71,48 @@ export function AppHeader({
           </div>
         </div>
       </div>
+
+      {selectedBookName && (
+        <div className="toc-range-bar">
+          <span className="toc-range-label">
+            Table des matières — pages du PDF (inclus, ordre du fichier)
+          </span>
+          <div className="toc-range-inputs">
+            <label className="toc-range-field">
+              <span className="toc-range-field-caption">Début</span>
+              <input
+                type="number"
+                className="toc-range-input monospace"
+                min={1}
+                step={1}
+                value={tocStartInput}
+                onChange={onTocStartChange}
+                placeholder="ex. 5"
+                aria-invalid={!!tocRangeHint}
+              />
+            </label>
+            <span className="toc-range-sep">—</span>
+            <label className="toc-range-field">
+              <span className="toc-range-field-caption">Fin</span>
+              <input
+                type="number"
+                className="toc-range-input monospace"
+                min={1}
+                step={1}
+                value={tocEndInput}
+                onChange={onTocEndChange}
+                placeholder="ex. 12"
+                aria-invalid={!!tocRangeHint}
+              />
+            </label>
+          </div>
+          {tocRangeHint && (
+            <p className="toc-range-hint" role="status">
+              {tocRangeHint}
+            </p>
+          )}
+        </div>
+      )}
 
       {status && <div className="status">{loading ? `⏳ ${status}` : status}</div>}
     </>

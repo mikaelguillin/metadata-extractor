@@ -27,8 +27,13 @@ export function usePersistedBooks() {
       ) {
         selectedBookId = parsed.books[0]?.id ?? null;
       }
+      const books = parsed.books.map((b) => ({
+        ...b,
+        tocPageStart: b.tocPageStart ?? null,
+        tocPageEnd: b.tocPageEnd ?? null,
+      }));
       const next: PersistedState = {
-        books: parsed.books,
+        books,
         selectedBookId,
       };
       setState(next);
@@ -43,7 +48,14 @@ export function usePersistedBooks() {
   const addBook = useCallback(
     (name: string) => {
       const id = crypto.randomUUID();
-      const book: Book = { id, name, pdfFileName: null, entries: [] };
+      const book: Book = {
+        id,
+        name,
+        pdfFileName: null,
+        tocPageStart: null,
+        tocPageEnd: null,
+        entries: [],
+      };
       setState((prev) => {
         const next: PersistedState = {
           books: [...prev.books, book],
@@ -81,7 +93,18 @@ export function usePersistedBooks() {
   );
 
   const patchBook = useCallback(
-    (id: string, patch: Partial<Pick<Book, "pdfFileName" | "entries">>) => {
+    (
+      id: string,
+      patch: Partial<
+        Pick<
+          Book,
+          | "pdfFileName"
+          | "entries"
+          | "tocPageStart"
+          | "tocPageEnd"
+        >
+      >,
+    ) => {
       setState((prev) => {
         const books = prev.books.map((b) =>
           b.id === id ? { ...b, ...patch } : b

@@ -13,14 +13,23 @@ export type PageTextItems = {
   items: FlatTextItem[];
 };
 
+/** Inclusive 1-based PDF page indices (pdf.js order). */
+export type PageIndexRange = {
+  start: number;
+  end: number;
+};
+
 export async function extractTextItems(
   doc: PDFDocumentProxy,
+  tocPages?: PageIndexRange,
 ): Promise<PageTextItems[]> {
   const pages: PageTextItems[] = [];
 
   const numPages = doc.numPages;
+  const startPage = tocPages?.start ?? 1;
+  const endPage = tocPages?.end ?? numPages;
 
-  for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+  for (let pageNum = startPage; pageNum <= endPage; pageNum++) {
     const page = await doc.getPage(pageNum);
     const viewport = page.getViewport({ scale: 1 });
     const textContent = await page.getTextContent();
