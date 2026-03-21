@@ -1,6 +1,6 @@
 import "../lib/pdf/worker";
 import type React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import { AppHeader } from "../components/AppHeader";
 import { BooksPanel } from "../components/BooksPanel";
@@ -32,6 +32,10 @@ export const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [tocStartInput, setTocStartInput] = useState("");
   const [tocEndInput, setTocEndInput] = useState("");
+  const [symbolPrefixInput, setSymbolPrefixInput] = useState("");
+
+  const selectedBookRef = useRef(selectedBook);
+  selectedBookRef.current = selectedBook;
 
   useEffect(() => {
     if (!selectedBook) {
@@ -50,6 +54,31 @@ export const App: React.FC = () => {
     selectedBook?.tocPageStart,
     selectedBook?.tocPageEnd,
   ]);
+
+  useEffect(() => {
+    if (!selectedBook) {
+      setSymbolPrefixInput("");
+      return;
+    }
+    setSymbolPrefixInput(selectedBook.symbolPrefix);
+  }, [selectedBookId, selectedBook?.symbolPrefix]);
+
+  useEffect(() => {
+    if (!selectedBookId) return;
+    const t = window.setTimeout(() => {
+      const book = selectedBookRef.current;
+      if (!book || book.id !== selectedBookId) return;
+      if (symbolPrefixInput === book.symbolPrefix) return;
+      patchBook(selectedBookId, {
+        symbolPrefix: symbolPrefixInput,
+        entries: book.entries.map((e) => ({
+          ...e,
+          symbol: symbolPrefixInput + e.sessionNumber,
+        })),
+      });
+    }, 350);
+    return () => clearTimeout(t);
+  }, [symbolPrefixInput, selectedBookId, patchBook]);
 
   const tocRange = useMemo(() => {
     const start = parsePositiveInt(tocStartInput);
@@ -124,12 +153,14 @@ export const App: React.FC = () => {
           page: p.page,
           items: p.items,
         })),
+        symbolPrefixInput,
       );
 
       patchBook(selectedBookId, {
         pdfFileName: file.name,
         tocPageStart: tocRange.start,
         tocPageEnd: tocRange.end,
+        symbolPrefix: symbolPrefixInput,
         entries: sessions,
       });
       setStatus(`Terminé. ${sessions.length} document(s) détectée(s) (pages ToC ${tocRange.start}–${tocRange.end}).`);
@@ -173,11 +204,25 @@ export const App: React.FC = () => {
       "sessionNumber" | "dateText" | "description"
     >,
   ) => {
-    if (!selectedBookId) return;
-    const next = (selectedBook?.entries ?? []).map((entry) =>
-      entry.id === id ? { ...entry, ...updates } : entry,
+    if (!selectedBookId || !selectedBook) return;
+    const prefix = symbolPrefixInput;
+    const withSymbol =
+      updates.sessionNumber !== undefined
+        ? {
+            ...updates,
+            symbol: prefix + updates.sessionNumber.trim(),
+          }
+        : updates;
+    const next = selectedBook.entries.map((entry) =>
+      entry.id === id ? { ...entry, ...withSymbol } : entry,
     );
     patchBook(selectedBookId, { entries: next });
+  };
+
+  const handleSymbolPrefixChange: React.ChangeEventHandler<HTMLInputElement> = (
+    ev,
+  ) => {
+    setSymbolPrefixInput(ev.target.value);
   };
 
   const handleClearAll = () => {
@@ -215,6 +260,8 @@ export const App: React.FC = () => {
             onTocStartChange={handleTocStartChange}
             onTocEndChange={handleTocEndChange}
             tocRangeHint={tocRangeHint}
+            symbolPrefixInput={symbolPrefixInput}
+            onSymbolPrefixChange={handleSymbolPrefixChange}
             onFileChange={handleFileChange}
             onClearAll={handleClearAll}
           />

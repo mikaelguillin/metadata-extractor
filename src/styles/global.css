@@ -275,6 +275,16 @@ body {
   color: #6b7280;
 }
 
+.toc-range-field-prefix {
+  flex: 1 1 10rem;
+  min-width: 8rem;
+}
+
+.toc-range-input-prefix {
+  width: 100%;
+  max-width: 14rem;
+}
+
 .toc-range-input {
   width: 5.5rem;
   padding: 7px 9px;
@@ -355,6 +365,20 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.session-symbol-display {
+  padding-bottom: 2px;
+  border-bottom: 1px solid rgba(55, 65, 81, 0.65);
+}
+
+.session-symbol-text {
+  margin-top: 4px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #e0e7ff;
+  letter-spacing: 0.02em;
+  word-break: break-all;
 }
 
 .session-field {

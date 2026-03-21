@@ -15,6 +15,7 @@ export function buildSessions(
     page: number;
     items: FlatTextItem[];
   }[],
+  symbolPrefix = "",
 ): SessionEntry[] {
   const sessions: SessionEntry[] = [];
 
@@ -29,6 +30,7 @@ export function buildSessions(
         id: `${currentPage}-${sessions.length}-${Date.now()}`,
         page: currentPage,
         sessionNumber: currentSessionNumber,
+        symbol: symbolPrefix + "SR." + currentSessionNumber,
         dateText: currentDate,
         description: currentDescription
           .filter((line) => !isFrenchDate(line))

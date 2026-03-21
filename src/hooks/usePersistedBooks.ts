@@ -29,22 +29,31 @@ export function usePersistedBooks() {
       ) {
         selectedBookId = parsed.books[0]?.id ?? null;
       }
-      const books = parsed.books.map((b) => ({
-        ...b,
-        tocPageStart: b.tocPageStart ?? null,
-        tocPageEnd: b.tocPageEnd ?? null,
-        entries: (b.entries ?? []).map((e) => {
-          const legacy = e as SessionEntry & { sessionLabel?: string };
-          const sessionNumber =
-            legacy.sessionNumber ??
-            (legacy.sessionLabel != null
-              ? extractSessionNumber(legacy.sessionLabel) ||
-                String(legacy.sessionLabel).trim()
-              : "");
-          const { sessionLabel: _omit, ...rest } = legacy;
-          return { ...rest, sessionNumber };
-        }),
-      }));
+      const symbolPrefixDefault = "";
+      const books = parsed.books.map((b) => {
+        const symbolPrefix = b.symbolPrefix ?? symbolPrefixDefault;
+        return {
+          ...b,
+          symbolPrefix,
+          tocPageStart: b.tocPageStart ?? null,
+          tocPageEnd: b.tocPageEnd ?? null,
+          entries: (b.entries ?? []).map((e) => {
+            const legacy = e as SessionEntry & { sessionLabel?: string };
+            const sessionNumber =
+              legacy.sessionNumber ??
+              (legacy.sessionLabel != null
+                ? extractSessionNumber(legacy.sessionLabel) ||
+                  String(legacy.sessionLabel).trim()
+                : "");
+            const { sessionLabel: _omit, symbol: _prevSym, ...rest } = legacy;
+            const symbol =
+              legacy.symbol != null && String(legacy.symbol).trim() !== ""
+                ? String(legacy.symbol)
+                : symbolPrefix + "SR." + sessionNumber;
+            return { ...rest, sessionNumber, symbol };
+          }),
+        };
+      });
       const next: PersistedState = {
         books,
         selectedBookId,
@@ -64,6 +73,7 @@ export function usePersistedBooks() {
       const book: Book = {
         id,
         name,
+        symbolPrefix: "",
         pdfFileName: null,
         tocPageStart: null,
         tocPageEnd: null,
@@ -111,6 +121,7 @@ export function usePersistedBooks() {
       patch: Partial<
         Pick<
           Book,
+          | "symbolPrefix"
           | "pdfFileName"
           | "entries"
           | "tocPageStart"

@@ -11,6 +11,8 @@ type AppHeaderProps = {
   onTocStartChange: React.ChangeEventHandler<HTMLInputElement>;
   onTocEndChange: React.ChangeEventHandler<HTMLInputElement>;
   tocRangeHint: string | null;
+  symbolPrefixInput: string;
+  onSymbolPrefixChange: React.ChangeEventHandler<HTMLInputElement>;
   onFileChange: React.ChangeEventHandler<HTMLInputElement>;
   onClearAll: () => void;
 };
@@ -26,6 +28,8 @@ export function AppHeader({
   onTocStartChange,
   onTocEndChange,
   tocRangeHint,
+  symbolPrefixInput,
+  onSymbolPrefixChange,
   onFileChange,
   onClearAll,
 }: AppHeaderProps) {
@@ -75,7 +79,7 @@ export function AppHeader({
       {selectedBookName && (
         <div className="toc-range-bar">
           <span className="toc-range-label">
-            Table des matières — pages du PDF (inclus, ordre du fichier)
+            Table des matières
           </span>
           <div className="toc-range-inputs">
             <label className="toc-range-field">
@@ -106,6 +110,19 @@ export function AppHeader({
               />
             </label>
           </div>
+          <label className="toc-range-field toc-range-field-prefix">
+            <span className="toc-range-field-caption">Préfixe symbole</span>
+            <input
+              type="text"
+              className="toc-range-input toc-range-input-prefix monospace"
+              value={symbolPrefixInput}
+              onChange={onSymbolPrefixChange}
+              placeholder="A/C.3/"
+              maxLength={80}
+              spellCheck={false}
+              aria-label="Préfixe symbole des documents"
+            />
+          </label>
           {tocRangeHint && (
             <p className="toc-range-hint" role="status">
               {tocRangeHint}

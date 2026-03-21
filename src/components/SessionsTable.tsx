@@ -130,6 +130,12 @@ function SessionRow({
   return (
     <li className="session-card">
       <div className="session-card-main">
+        <div className="session-symbol-display">
+          <div className="session-field-label">Symbole</div>
+          <div className="session-symbol-text monospace" title={entry.symbol}>
+            {entry.symbol}
+          </div>
+        </div>
         <div className="session-field">
           <label className="session-field-label" htmlFor={sessionNoId}>
             Session no.
