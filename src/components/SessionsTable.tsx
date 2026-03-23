@@ -19,16 +19,25 @@ type SessionsTableProps = {
       "sessionNumber" | "dateText" | "description"
     >,
   ) => void;
+  excerptDownloadEnabled?: boolean;
+  excerptDownloadingId?: string | null;
+  onDownloadExcerpt?: (id: string) => void | Promise<void>;
 };
 
 function SessionRow({
   entry,
   onDelete,
   onUpdateEntry,
+  excerptDownloadEnabled,
+  excerptDownloading,
+  onDownloadExcerpt,
 }: {
   entry: SessionEntry;
   onDelete: (id: string) => void;
   onUpdateEntry: SessionsTableProps["onUpdateEntry"];
+  excerptDownloadEnabled: boolean;
+  excerptDownloading: boolean;
+  onDownloadExcerpt?: (id: string) => void | Promise<void>;
 }) {
   const [sessionNumber, setSessionNumber] = useState(entry.sessionNumber);
   const [dateText, setDateText] = useState(entry.dateText);
@@ -192,6 +201,21 @@ function SessionRow({
         </div>
       </div>
       <div className="session-card-actions">
+        {onDownloadExcerpt && (
+          <button
+            type="button"
+            className="button primary"
+            disabled={!excerptDownloadEnabled || excerptDownloading}
+            title={
+              excerptDownloadEnabled
+                ? "Télécharger l’extrait PDF (pied de page)"
+                : "Enregistrez d’abord le PDF du livre (extrait ToC)."
+            }
+            onClick={() => onDownloadExcerpt(entry.id)}
+          >
+            {excerptDownloading ? "…" : "PDF extrait"}
+          </button>
+        )}
         <button
           type="button"
           className="button danger"
@@ -209,6 +233,9 @@ export function SessionsTable({
   emptyMessage,
   onDelete,
   onUpdateEntry,
+  excerptDownloadEnabled = false,
+  excerptDownloadingId = null,
+  onDownloadExcerpt,
 }: SessionsTableProps) {
   if (entries.length === 0) {
     return <div className="empty">{emptyMessage}</div>;
@@ -222,6 +249,9 @@ export function SessionsTable({
           entry={entry}
           onDelete={onDelete}
           onUpdateEntry={onUpdateEntry}
+          excerptDownloadEnabled={excerptDownloadEnabled}
+          excerptDownloading={excerptDownloadingId === entry.id}
+          onDownloadExcerpt={onDownloadExcerpt}
         />
       ))}
     </ul>

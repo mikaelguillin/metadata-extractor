@@ -1,13 +1,15 @@
 import "../lib/pdf/worker";
 import type React from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import { AppHeader } from "../components/AppHeader";
 import { BooksPanel } from "../components/BooksPanel";
 import { SessionsTable } from "../components/SessionsTable";
 import { usePersistedBooks } from "../hooks/usePersistedBooks";
+import { downloadSessionExcerptPdf } from "../lib/pdf/downloadSessionExcerpt";
 import { extractTextItems } from "../lib/pdf/extractTextItems";
 import { buildSessions } from "../lib/sessions/buildSessions";
+import { savePdfBlob } from "../lib/storage/pdfBlobStore";
 import type { SessionEntry } from "../types/session";
 
 function parsePositiveInt(s: string): number | null {
@@ -30,6 +32,9 @@ export const App: React.FC = () => {
   } = usePersistedBooks();
   const [status, setStatus] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [excerptDownloadingId, setExcerptDownloadingId] = useState<
+    string | null
+  >(null);
   const [tocStartInput, setTocStartInput] = useState("");
   const [tocEndInput, setTocEndInput] = useState("");
   const [symbolPrefixInput, setSymbolPrefixInput] = useState("");
@@ -128,7 +133,8 @@ export const App: React.FC = () => {
 
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+      // PDF.js may detach the buffer passed to getDocument; keep the original for IndexedDB.
+      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer.slice(0) });
       const doc = await loadingTask.promise;
 
       if (tocRange.end > doc.numPages) {
@@ -156,8 +162,11 @@ export const App: React.FC = () => {
         symbolPrefixInput,
       );
 
+      await savePdfBlob(selectedBookId, arrayBuffer);
+
       patchBook(selectedBookId, {
         pdfFileName: file.name,
+        pdfBlobKey: selectedBookId,
         tocPageStart: tocRange.start,
         tocPageEnd: tocRange.end,
         symbolPrefix: symbolPrefixInput,
@@ -231,7 +240,48 @@ export const App: React.FC = () => {
     setStatus("Toutes les entrées de ce livre ont été supprimées.");
   };
 
+  const handleDownloadExcerpt = useCallback(
+    async (entryId: string) => {
+      if (!selectedBookId || !selectedBook) return;
+      if (
+        !selectedBook.pdfBlobKey ||
+        selectedBook.tocPageEnd == null ||
+        selectedBook.entries.length === 0
+      ) {
+        setStatus(
+          "PDF du livre introuvable. Veuillez recharger le fichier PDF.",
+        );
+        return;
+      }
+      setExcerptDownloadingId(entryId);
+      setStatus("Préparation de l'extrait PDF…");
+      try {
+        await downloadSessionExcerptPdf({
+          bookId: selectedBookId,
+          tocPageEnd: selectedBook.tocPageEnd,
+          entries: selectedBook.entries,
+          entryId,
+        });
+        setStatus("Extrait PDF téléchargé.");
+      } catch (err) {
+        console.error(err);
+        setStatus(
+          err instanceof Error
+            ? err.message
+            : "Erreur lors de la création de l'extrait PDF.",
+        );
+      } finally {
+        setExcerptDownloadingId(null);
+      }
+    },
+    [selectedBook, selectedBookId],
+  );
+
   const entries = selectedBook?.entries ?? [];
+  const excerptDownloadEnabled =
+    !!selectedBook?.pdfBlobKey &&
+    selectedBook.tocPageEnd != null &&
+    entries.length > 0;
   const emptyTableMessage = !selectedBookId
     ? "Sélectionnez un livre dans la liste."
     : !selectedBook?.pdfFileName
@@ -272,6 +322,9 @@ export const App: React.FC = () => {
               emptyMessage={emptyTableMessage}
               onDelete={handleDeleteEntry}
               onUpdateEntry={handleUpdateEntry}
+              excerptDownloadEnabled={excerptDownloadEnabled}
+              excerptDownloadingId={excerptDownloadingId}
+              onDownloadExcerpt={handleDownloadExcerpt}
             />
           </div>
         </div>

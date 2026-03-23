@@ -69,3 +69,35 @@ export async function extractTextItems(
 
   return pages;
 }
+
+/** Raw text items in PDF user space (no column reordering). */
+export async function extractRawTextItemsForPage(
+  doc: PDFDocumentProxy,
+  pageNum: number,
+): Promise<{ width: number; height: number; items: FlatTextItem[] }> {
+  const page = await doc.getPage(pageNum);
+  const viewport = page.getViewport({ scale: 1 });
+  const textContent = await page.getTextContent();
+
+  const mapped: FlatTextItem[] = textContent.items
+    .map((item) => {
+      const textItem = item as TextItem | TextMarkedContent;
+      if (!("transform" in textItem) || !("str" in textItem)) return null;
+      const [, , , , e, f] = textItem.transform;
+      return {
+        str: textItem.str,
+        x: e,
+        y: f,
+        width: textItem.width,
+        height: textItem.height,
+        hasEOL: textItem.hasEOL,
+      };
+    })
+    .filter((it): it is FlatTextItem => !!it && !!it.str.trim());
+
+  return {
+    width: viewport.width,
+    height: viewport.height,
+    items: mapped,
+  };
+}

@@ -58,8 +58,11 @@ export function BooksPanel({
                   onClick={() => onSelect(book.id)}
                 >
                   <span className="books-list-name">{book.name}</span>
-                  {book.pdfFileName && (
-                    <span className="books-list-pdf monospace" title={book.pdfFileName}>
+                  {(book.pdfBlobKey || book.pdfFileName) && (
+                    <span
+                      className="books-list-pdf monospace"
+                      title={book.pdfFileName ?? "PDF enregistré"}
+                    >
                       PDF
                     </span>
                   )}

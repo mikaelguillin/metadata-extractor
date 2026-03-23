@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { extractSessionNumber } from "../lib/sessions/lineHeuristics";
+import { deletePdfBlob } from "../lib/storage/pdfBlobStore";
 import type { Book } from "../types/book";
 import type { SessionEntry } from "../types/session";
 
@@ -35,6 +36,7 @@ export function usePersistedBooks() {
         return {
           ...b,
           symbolPrefix,
+          pdfBlobKey: b.pdfBlobKey ?? null,
           tocPageStart: b.tocPageStart ?? null,
           tocPageEnd: b.tocPageEnd ?? null,
           entries: (b.entries ?? []).map((e) => {
@@ -75,6 +77,7 @@ export function usePersistedBooks() {
         name,
         symbolPrefix: "",
         pdfFileName: null,
+        pdfBlobKey: null,
         tocPageStart: null,
         tocPageEnd: null,
         entries: [],
@@ -92,6 +95,7 @@ export function usePersistedBooks() {
   );
 
   const deleteBook = useCallback((id: string) => {
+    void deletePdfBlob(id).catch(() => {});
     setState((prev) => {
       const books = prev.books.filter((b) => b.id !== id);
       let selectedBookId = prev.selectedBookId;
@@ -123,6 +127,7 @@ export function usePersistedBooks() {
           Book,
           | "symbolPrefix"
           | "pdfFileName"
+          | "pdfBlobKey"
           | "entries"
           | "tocPageStart"
           | "tocPageEnd"
