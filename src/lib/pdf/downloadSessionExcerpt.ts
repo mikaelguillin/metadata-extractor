@@ -2,7 +2,7 @@ import { PDFDocument } from "pdf-lib";
 import * as pdfjsLib from "pdfjs-dist";
 import type { SessionEntry } from "../../types/session";
 import { getPdfBlob } from "../storage/pdfBlobStore";
-import { computeExcerptPageRanges } from "./footerSymbol";
+import { findExcerptPageRangeForSymbol } from "./footerSymbol";
 
 function triggerDownload(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
@@ -45,13 +45,19 @@ export async function downloadSessionExcerptPdf(params: {
     throw new Error("Entrée introuvable.");
   }
 
-  const loadingTask = pdfjsLib.getDocument({ data: buffer });
+  // pdf.js may transfer/detach `data` to a worker; keep the original buffer for pdf-lib.
+  const loadingTask = pdfjsLib.getDocument({ data: buffer.slice(0) });
   const doc = await loadingTask.promise;
 
-  const ranges = await computeExcerptPageRanges(doc, tocPageEnd, entries);
-  const range = ranges.get(entryId);
+  const range = await findExcerptPageRangeForSymbol(
+    doc,
+    tocPageEnd,
+    entry.symbol,
+  );
   if (!range) {
-    throw new Error("Impossible de déterminer la plage de pages pour cet extrait.");
+    throw new Error(
+      `Symbole « ${entry.symbol.trim()} » introuvable dans le pied de page après la table des matières.`,
+    );
   }
 
   const srcPdf = await PDFDocument.load(buffer);

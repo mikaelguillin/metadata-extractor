@@ -1,5 +1,5 @@
 import type { PDFDocumentProxy } from "pdfjs-dist";
-import type { FlatTextItem, SessionEntry } from "../../types/session";
+import type { FlatTextItem } from "../../types/session";
 import { compareReadingOrder, needsSpaceBetween } from "../sessions/lineHeuristics";
 import { extractRawTextItemsForPage } from "./extractTextItems";
 
@@ -48,7 +48,6 @@ function buildLineInRegion(items: FlatTextItem[], region: Rect): string {
     if (i > 0 && needsSpaceBetween(sorted[i - 1], sorted[i])) out += " ";
     out += sorted[i].str;
   }
-  console.log({out})
   return out.trim();
 }
 
@@ -64,50 +63,37 @@ export async function readFooterLine(
 export type ExcerptPageRange = { start: number; end: number };
 
 /**
- * For each session row (in table order), finds the first footer match after the previous
- * row’s start page, starting the first search after `tocPageEnd`.
+ * Finds the page range for one session: first footer match for `symbol` after the ToC,
+ * through consecutive pages whose footer still equals that symbol.
+ *
+ * This does not depend on table row order. ToC order can differ from body order without
+ * mixing up excerpts.
  */
-export async function computeExcerptPageRanges(
+export async function findExcerptPageRangeForSymbol(
   doc: PDFDocumentProxy,
   tocPageEnd: number,
-  entries: SessionEntry[],
-): Promise<Map<string, ExcerptPageRange>> {
+  symbol: string,
+): Promise<ExcerptPageRange | null> {
+  const sym = symbol.trim();
   const numPages = doc.numPages;
-  const ranges = new Map<string, ExcerptPageRange>();
-  if (entries.length === 0) return ranges;
+  let start: number | null = null;
 
-  let searchFrom = tocPageEnd + 1;
-  const starts: number[] = [];
-
-  for (let i = 0; i < entries.length; i++) {
-    const sym = entries[i].symbol.trim();
-    let found: number | null = null;
-    for (let p = searchFrom; p <= numPages; p++) {
-      const line = await readFooterLine(doc, p);
-      if (line === sym) {
-        found = p;
-        break;
-      }
+  for (let p = tocPageEnd + 1; p <= numPages; p++) {
+    const line = await readFooterLine(doc, p);
+    if (line === sym) {
+      start = p;
+      break;
     }
-    if (found === null) {
-      throw new Error(
-        `Symbole « ${sym} » introuvable dans le pied de page après la table des matières.`,
-      );
-    }
-    starts.push(found);
-    searchFrom = found + 1;
   }
 
-  for (let i = 0; i < entries.length; i++) {
-    const end =
-      i + 1 < entries.length ? starts[i + 1] - 1 : numPages;
-    if (end < starts[i]) {
-      throw new Error(
-        "Ordre des symboles dans le pied de page incompatible avec les lignes du tableau.",
-      );
-    }
-    ranges.set(entries[i].id, { start: starts[i], end });
+  if (start === null) return null;
+
+  let end = start;
+  for (let p = start + 1; p <= numPages; p++) {
+    const line = await readFooterLine(doc, p);
+    if (line === sym) end = p;
+    else break;
   }
 
-  return ranges;
+  return { start, end };
 }
