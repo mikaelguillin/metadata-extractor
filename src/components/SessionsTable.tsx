@@ -6,6 +6,14 @@ import {
 } from "react";
 import { sessionTitleFromFields } from "../lib/sessions/sessionTitlePattern";
 import type { SessionEntry } from "../types/session";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 const SAVE_DEBOUNCE_MS = 400;
 
@@ -146,110 +154,120 @@ function SessionRow({
     dateText,
   );
 
+  const fieldCaption =
+    "text-[0.72rem] font-medium tracking-wide text-muted-foreground uppercase";
+
   return (
-    <li className="session-card">
-      <div className="session-card-main">
-        <div className="session-symbol-display">
-          <div className="session-field-label">Symbole</div>
-          <div className="session-symbol-text monospace" title={entry.symbol}>
-            {entry.symbol}
+    <li className="list-none">
+      <Card
+        size="sm"
+        className="gap-0 sm:flex-row sm:items-start"
+      >
+        <CardContent className="flex min-w-0 flex-1 flex-col gap-3 py-4">
+          <div className="border-border border-b pb-2">
+            <div className={fieldCaption}>Symbole</div>
+            <div
+              className="mt-1 break-all font-mono text-[0.95rem] font-semibold tracking-wide text-indigo-100"
+              title={entry.symbol}
+            >
+              {entry.symbol}
+            </div>
           </div>
-        </div>
-        <div className="session-field">
-          <label className="session-field-label" htmlFor={sessionNoId}>
-            Session no.
-          </label>
-          <input
-            id={sessionNoId}
-            className="session-field-input monospace"
-            type="text"
-            inputMode="numeric"
-            value={sessionNumber}
-            onChange={(e) => {
-              setSessionNumber(e.target.value);
-              scheduleRestSave();
-            }}
-            onBlur={handleBlurRest}
-            spellCheck={false}
-          />
-        </div>
-        <div className="session-field">
-          <label className="session-field-label" htmlFor={dateId}>
-            Date
-          </label>
-          <input
-            id={dateId}
-            className="session-field-input"
-            type="text"
-            value={dateText}
-            onChange={(e) => {
-              setDateText(e.target.value);
-              scheduleRestSave();
-            }}
-            onBlur={handleBlurRest}
-            spellCheck={true}
-            lang="fr"
-          />
-        </div>
-        <div className="session-field">
-          <label className="session-field-label" htmlFor={titleId}>
-            Title
-          </label>
-          <input
-            id={titleId}
-            className="session-field-input"
-            readOnly
-            aria-readonly="true"
-            value={displayedTitle}
-            spellCheck={false}
-          />
-        </div>
-        <div className="session-field">
-          <label className="session-field-label" htmlFor={descId}>
-            Description
-          </label>
-          <textarea
-            id={descId}
-            className="session-field-input session-field-textarea"
-            value={description}
-            onChange={(e) => {
-              setDescription(e.target.value);
-              scheduleRestSave();
-            }}
-            onBlur={handleBlurRest}
-            rows={10}
-            spellCheck={true}
-            lang="fr"
-          />
-        </div>
-      </div>
-      <div className="session-card-actions">
-        {onDownloadExcerpt && (
-          <button
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor={sessionNoId} className={fieldCaption}>
+              Session no.
+            </Label>
+            <Input
+              id={sessionNoId}
+              className="font-mono tabular-nums"
+              type="text"
+              inputMode="numeric"
+              value={sessionNumber}
+              onChange={(e) => {
+                setSessionNumber(e.target.value);
+                scheduleRestSave();
+              }}
+              onBlur={handleBlurRest}
+              spellCheck={false}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor={dateId} className={fieldCaption}>
+              Date
+            </Label>
+            <Input
+              id={dateId}
+              type="text"
+              value={dateText}
+              onChange={(e) => {
+                setDateText(e.target.value);
+                scheduleRestSave();
+              }}
+              onBlur={handleBlurRest}
+              spellCheck={true}
+              lang="fr"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor={titleId} className={fieldCaption}>
+              Title
+            </Label>
+            <Input
+              id={titleId}
+              readOnly
+              aria-readonly="true"
+              value={displayedTitle}
+              spellCheck={false}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor={descId} className={fieldCaption}>
+              Description
+            </Label>
+            <Textarea
+              id={descId}
+              className="min-h-[5.5rem] resize-y leading-snug whitespace-pre-wrap"
+              value={description}
+              onChange={(e) => {
+                setDescription(e.target.value);
+                scheduleRestSave();
+              }}
+              onBlur={handleBlurRest}
+              rows={10}
+              spellCheck={true}
+              lang="fr"
+            />
+          </div>
+        </CardContent>
+        <div className="flex shrink-0 flex-col gap-2 border-border border-t px-4 py-3 sm:self-start sm:border-t-0 sm:border-l sm:pt-4">
+          {onDownloadExcerpt && (
+            <Button
+              type="button"
+              size="sm"
+              disabled={!excerptDownloadEnabled || excerptDownloading}
+              title={
+                excerptDownloadEnabled
+                  ? "Télécharger l’extrait PDF (pied de page)"
+                  : "Enregistrez d’abord le PDF du livre (extrait ToC)."
+              }
+              onClick={() => onDownloadExcerpt(entry.id)}
+            >
+              {excerptDownloading ? "…" : "Download PDF"}
+            </Button>
+          )}
+          <Button
             type="button"
-            className="button primary"
-            disabled={!excerptDownloadEnabled || excerptDownloading}
-            title={
-              excerptDownloadEnabled
-                ? "Télécharger l’extrait PDF (pied de page)"
-                : "Enregistrez d’abord le PDF du livre (extrait ToC)."
-            }
-            onClick={() => onDownloadExcerpt(entry.id)}
+            variant="destructive"
+            size="sm"
+            onClick={() => {
+              flushRestDebounced();
+              onDelete(entry.id);
+            }}
           >
-            {excerptDownloading ? "…" : "Download PDF"}
-          </button>
-        )}
-        <button
-          type="button"
-          className="button danger"
-          onClick={() => {
-            flushRestDebounced();
-            onDelete(entry.id);
-          }}
-        >
-          Delete
-        </button>
-      </div>
+            Delete
+          </Button>
+        </div>
+      </Card>
     </li>
   );
 }
@@ -265,11 +283,18 @@ export function SessionsTable({
   onDownloadExcerpt,
 }: SessionsTableProps) {
   if (entries.length === 0) {
-    return <div className="empty">{emptyMessage}</div>;
+    return (
+      <div className="p-5 text-center text-sm text-muted-foreground">
+        {emptyMessage}
+      </div>
+    );
   }
 
   return (
-    <ul className="sessions-list" aria-label="Extracted documents">
+    <ul
+      className="m-0 flex list-none flex-col gap-3 p-3"
+      aria-label="Extracted documents"
+    >
       {entries.map((entry) => (
         <SessionRow
           key={entry.id}

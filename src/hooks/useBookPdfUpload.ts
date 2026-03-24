@@ -5,6 +5,7 @@ import { extractTextItems } from "../lib/pdf/extractTextItems";
 import { buildSessions } from "../lib/sessions/buildSessions";
 import { effectiveSessionTitlePattern } from "../lib/sessions/sessionTitlePattern";
 import type { TocRangeResult } from "../lib/tocRange";
+import { appToastManager } from "../lib/appToast";
 import { savePdfBlob } from "../lib/storage/pdfBlobStore";
 import type { Book } from "../types/book";
 
@@ -30,7 +31,6 @@ type UseBookPdfUploadArgs = {
   symbolPrefixInput: string;
   sessionTitlePatternInput: string;
   patchBook: PatchBook;
-  setStatus: (message: string) => void;
 };
 
 export function useBookPdfUpload({
@@ -39,7 +39,6 @@ export function useBookPdfUpload({
   symbolPrefixInput,
   sessionTitlePatternInput,
   patchBook,
-  setStatus,
 }: UseBookPdfUploadArgs) {
   const [loading, setLoading] = useState(false);
 
@@ -50,12 +49,19 @@ export function useBookPdfUpload({
         if (!file || !bookId) return;
 
         if (!tocRange.ok) {
-          setStatus("Plage de pages ToC invalide.");
+          appToastManager.add({
+            type: "error",
+            description: "Plage de pages ToC invalide.",
+          });
           e.target.value = "";
           return;
         }
 
-        setStatus(`Chargement du PDF "${file.name}"…`);
+        const toastId = appToastManager.add({
+          type: "loading",
+          description: `Chargement du PDF "${file.name}"…`,
+          timeout: 0,
+        });
         setLoading(true);
 
         try {
@@ -64,21 +70,27 @@ export function useBookPdfUpload({
           const doc = await loadingTask.promise;
 
           if (tocRange.end > doc.numPages) {
-            setStatus(
-              `La page fin (${tocRange.end}) dépasse le nombre de pages du PDF (${doc.numPages}).`,
-            );
+            appToastManager.update(toastId, {
+              type: "error",
+              description: `La page fin (${tocRange.end}) dépasse le nombre de pages du PDF (${doc.numPages}).`,
+              timeout: 7000,
+            });
             return;
           }
 
-          setStatus(
-            `PDF chargé (${doc.numPages} pages). Extraction du texte des pages ${tocRange.start}–${tocRange.end}…`,
-          );
+          appToastManager.update(toastId, {
+            type: "loading",
+            description: `PDF chargé (${doc.numPages} pages). Extraction du texte des pages ${tocRange.start}–${tocRange.end}…`,
+          });
 
           const pages = await extractTextItems(doc, {
             start: tocRange.start,
             end: tocRange.end,
           });
-          setStatus(`Texte extrait. Construction des documents…`);
+          appToastManager.update(toastId, {
+            type: "loading",
+            description: "Texte extrait. Construction des documents…",
+          });
 
           const sessions = buildSessions(
             pages.map((p) => ({
@@ -102,12 +114,18 @@ export function useBookPdfUpload({
             ),
             entries: sessions,
           });
-          setStatus(
-            `Terminé. ${sessions.length} document(s) détectée(s) (pages ToC ${tocRange.start}–${tocRange.end}).`,
-          );
+          appToastManager.update(toastId, {
+            type: "success",
+            description: `Terminé. ${sessions.length} document(s) détectée(s) (pages ToC ${tocRange.start}–${tocRange.end}).`,
+            timeout: 5000,
+          });
         } catch (err) {
           console.error(err);
-          setStatus("Erreur lors du traitement du PDF.");
+          appToastManager.update(toastId, {
+            type: "error",
+            description: "Erreur lors du traitement du PDF.",
+            timeout: 7000,
+          });
         } finally {
           setLoading(false);
           e.target.value = "";
@@ -118,7 +136,6 @@ export function useBookPdfUpload({
         patchBook,
         sessionTitlePatternInput,
         symbolPrefixInput,
-        setStatus,
         tocRange,
       ],
     );

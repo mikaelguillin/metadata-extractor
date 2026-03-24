@@ -1,6 +1,16 @@
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import type { Book } from "../types/book";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type BooksPanelProps = {
   books: Book[];
@@ -74,94 +84,114 @@ export function BooksPanel({
   };
 
   return (
-    <aside className="books-panel">
-      <div className="books-panel-title">Livres</div>
-      <form className="books-panel-form" onSubmit={handleSubmit}>
-        <input
-          className="books-panel-input"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Nom du livre"
-          maxLength={200}
-          aria-label="Nom du livre"
-        />
-        <button className="button primary" type="submit">
-          Créer
-        </button>
-      </form>
-      {books.length === 0 ? (
-        <p className="books-panel-empty">Créez un livre pour y associer un PDF.</p>
-      ) : (
-        <ul className="books-list">
-          {books.map((book) => {
-            const selected = book.id === selectedBookId;
-            const isRenaming = book.id === renamingId;
-            return (
-              <li key={book.id}>
-                {isRenaming ? (
-                  <input
-                    ref={renameInputRef}
-                    type="text"
-                    className="books-list-rename-input"
-                    value={renameDraft}
-                    onChange={(e) => setRenameDraft(e.target.value)}
-                    onBlur={commitRename}
-                    onKeyDown={handleRenameKeyDown}
-                    maxLength={200}
-                    aria-label="Nouveau nom du livre"
-                  />
-                ) : (
-                  <button
-                    type="button"
-                    className={`books-list-item${selected ? " selected" : ""}`}
-                    onClick={() => onSelect(book.id)}
-                  >
-                    <span className="books-list-name">{book.name}</span>
-                    {(book.pdfBlobKey || book.pdfFileName) && (
-                      <span
-                        className="books-list-pdf monospace"
-                        title={book.pdfFileName ?? "PDF enregistré"}
+    <aside>
+      <Card size="sm" className="border-border/80 bg-muted/20">
+        <CardHeader className="px-4 pt-4 pb-0">
+          <CardTitle className="text-[0.78rem] font-semibold tracking-wide text-muted-foreground uppercase">
+            Livres
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3 px-4 pb-4">
+          <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
+            <Label htmlFor="new-book-name" className="sr-only">
+              Nom du livre
+            </Label>
+            <Input
+              id="new-book-name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Nom du livre"
+              maxLength={200}
+              aria-label="Nom du livre"
+            />
+            <Button type="submit" size="sm">
+              Créer
+            </Button>
+          </form>
+          {books.length === 0 ? (
+            <p className="m-0 text-[0.8rem] text-muted-foreground leading-snug">
+              Créez un livre pour y associer un PDF.
+            </p>
+          ) : (
+            <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
+              {books.map((book) => {
+                const selected = book.id === selectedBookId;
+                const isRenaming = book.id === renamingId;
+                return (
+                  <li key={book.id} className="flex items-stretch gap-1.5">
+                    {isRenaming ? (
+                      <Input
+                        ref={renameInputRef}
+                        type="text"
+                        className="min-w-0 flex-1 font-sans text-[0.82rem]"
+                        value={renameDraft}
+                        onChange={(e) => setRenameDraft(e.target.value)}
+                        onBlur={commitRename}
+                        onKeyDown={handleRenameKeyDown}
+                        maxLength={200}
+                        aria-label="Nouveau nom du livre"
+                      />
+                    ) : (
+                      <Button
+                        type="button"
+                        variant={selected ? "secondary" : "outline"}
+                        size="sm"
+                        className="h-auto min-w-0 flex-1 justify-between gap-2 py-2 text-left text-[0.82rem] font-normal"
+                        onClick={() => onSelect(book.id)}
                       >
-                        PDF
-                      </span>
+                        <span className="truncate">{book.name}</span>
+                        {(book.pdfBlobKey || book.pdfFileName) && (
+                          <Badge
+                            variant="outline"
+                            className="shrink-0 border-emerald-500/35 bg-emerald-500/10 px-1.5 py-0 text-[0.65rem] text-emerald-300 font-mono"
+                            title={book.pdfFileName ?? "PDF enregistré"}
+                          >
+                            PDF
+                          </Badge>
+                        )}
+                      </Button>
                     )}
-                  </button>
-                )}
-                <button
-                  type="button"
-                  className="button books-list-rename"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (isRenaming) {
-                      commitRename();
-                    } else {
-                      beginRename(book);
-                    }
-                  }}
-                  aria-label={
-                    isRenaming
-                      ? "Valider le nom"
-                      : `Renommer ${book.name}`
-                  }
-                  title={isRenaming ? "Valider" : "Renommer"}
-                >
-                  ✎
-                </button>
-                <button
-                  type="button"
-                  className="button danger books-list-delete"
-                  onClick={() => onDelete(book.id)}
-                  disabled={isRenaming}
-                  aria-label={`Supprimer ${book.name}`}
-                >
-                  ×
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon-sm"
+                      className="shrink-0 text-base"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (isRenaming) {
+                          commitRename();
+                        } else {
+                          beginRename(book);
+                        }
+                      }}
+                      aria-label={
+                        isRenaming
+                          ? "Valider le nom"
+                          : `Renommer ${book.name}`
+                      }
+                      title={isRenaming ? "Valider" : "Renommer"}
+                    >
+                      ✎
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon-sm"
+                      className="shrink-0 text-lg leading-none"
+                      onClick={() => onDelete(book.id)}
+                      disabled={isRenaming}
+                      aria-label={`Supprimer ${book.name}`}
+                    >
+                      ×
+                    </Button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
     </aside>
   );
 }

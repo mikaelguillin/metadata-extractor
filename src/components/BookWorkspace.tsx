@@ -14,6 +14,8 @@ import {
 } from "../lib/tocRange";
 import type { Book } from "../types/book";
 import type { SessionEntry } from "../types/session";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { appToastManager } from "@/lib/appToast";
 
 type PatchBook = (
   id: string,
@@ -47,7 +49,6 @@ function initialTocEnd(book: Book | null): string {
 }
 
 export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
-  const [status, setStatus] = useState("");
   const [excerptDownloadingId, setExcerptDownloadingId] = useState<
     string | null
   >(null);
@@ -94,7 +95,6 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
     symbolPrefixInput,
     sessionTitlePatternInput,
     patchBook,
-    setStatus,
   });
 
   const uploadDisabled = !bookId || !tocRange.ok;
@@ -228,7 +228,9 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
   const handleClearAll = () => {
     if (!bookId) return;
     patchBook(bookId, { entries: [], pdfFileName: null });
-    setStatus("Toutes les entrées de ce livre ont été supprimées.");
+    appToastManager.add({
+      description: "Toutes les entrées de ce livre ont été supprimées.",
+    });
   };
 
   const handleDownloadExcerpt = useCallback(
@@ -239,13 +241,19 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
         book.tocPageEnd == null ||
         book.entries.length === 0
       ) {
-        setStatus(
-          "PDF du livre introuvable. Veuillez recharger le fichier PDF.",
-        );
+        appToastManager.add({
+          type: "error",
+          description:
+            "PDF du livre introuvable. Veuillez recharger le fichier PDF.",
+        });
         return;
       }
       setExcerptDownloadingId(entryId);
-      setStatus("Préparation de l'extrait PDF…");
+      const toastId = appToastManager.add({
+        type: "loading",
+        description: "Préparation de l’extrait PDF…",
+        timeout: 0,
+      });
       try {
         await downloadSessionExcerptPdf({
           bookId,
@@ -253,14 +261,21 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
           entries: book.entries,
           entryId,
         });
-        setStatus("Extrait PDF téléchargé.");
+        appToastManager.update(toastId, {
+          type: "success",
+          description: "Extrait PDF téléchargé.",
+          timeout: 5000,
+        });
       } catch (err) {
         console.error(err);
-        setStatus(
-          err instanceof Error
-            ? err.message
-            : "Erreur lors de la création de l'extrait PDF.",
-        );
+        appToastManager.update(toastId, {
+          type: "error",
+          description:
+            err instanceof Error
+              ? err.message
+              : "Erreur lors de la création de l’extrait PDF.",
+          timeout: 7000,
+        });
       } finally {
         setExcerptDownloadingId(null);
       }
@@ -280,11 +295,10 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
       : "Aucun document détecté dans la plage ToC indiquée.";
 
   return (
-    <div className="main-column">
+    <div className="min-w-0">
       <AppHeader
         selectedBookName={book?.name ?? null}
         entryCount={entries.length}
-        status={status}
         loading={loading}
         uploadDisabled={uploadDisabled}
         tocStartInput={tocStartInput}
@@ -300,7 +314,7 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
         onClearAll={handleClearAll}
       />
 
-      <div className="table-wrapper">
+      <ScrollArea className="h-[65vh] rounded-xl border border-border bg-card ring-1 ring-foreground/10">
         <SessionsTable
           entries={entries}
           sessionTitlePattern={effectiveSessionTitlePattern(
@@ -313,7 +327,7 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
           excerptDownloadingId={excerptDownloadingId}
           onDownloadExcerpt={handleDownloadExcerpt}
         />
-      </div>
+      </ScrollArea>
     </div>
   );
 }

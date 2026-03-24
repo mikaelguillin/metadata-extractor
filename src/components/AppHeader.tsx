@@ -1,9 +1,15 @@
 import type React from "react";
+import { useRef } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 type AppHeaderProps = {
   selectedBookName: string | null;
   entryCount: number;
-  status: string;
   loading: boolean;
   uploadDisabled: boolean;
   tocStartInput: string;
@@ -22,7 +28,6 @@ type AppHeaderProps = {
 export function AppHeader({
   selectedBookName,
   entryCount,
-  status,
   loading,
   uploadDisabled,
   tocStartInput,
@@ -37,119 +42,159 @@ export function AppHeader({
   onFileChange,
   onClearAll,
 }: AppHeaderProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   return (
     <>
-      <div className="header">
+      <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <div className="title">Analyseur de PDF</div>
-          <div className="subtitle">
+          <div className="font-heading text-[1.4rem] font-semibold tracking-wide">
+            Metadata extractor
+          </div>
+          <div className="mt-1 text-[0.9rem] text-muted-foreground">
             {selectedBookName ? (
               <>
-                Livre sélectionné : <strong>{selectedBookName}</strong>
+                Livre sélectionné :{" "}
+                <strong className="text-foreground">{selectedBookName}</strong>
               </>
             ) : (
               <>Sélectionnez un livre pour charger un PDF.</>
             )}
           </div>
         </div>
-        <div className="controls">
-          <label
-            className={`file-input-label${uploadDisabled ? " disabled" : ""}`}
-            aria-disabled={uploadDisabled}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <input
+            ref={fileInputRef}
+            id="book-pdf-file"
+            type="file"
+            accept="application/pdf"
+            onChange={onFileChange}
+            disabled={uploadDisabled}
+            className="sr-only"
+            tabIndex={-1}
+            aria-label="Fichier PDF du livre"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={uploadDisabled || loading}
+            className="inline-flex items-center gap-2 rounded-full border-dashed"
+            onClick={() => fileInputRef.current?.click()}
+            aria-disabled={uploadDisabled || loading}
+            aria-controls="book-pdf-file"
           >
-            <span>Choisir un PDF</span>
-            <span className="pill monospace">pdfjs-dist</span>
-            <input
-              type="file"
-              accept="application/pdf"
-              onChange={onFileChange}
-              disabled={uploadDisabled}
-            />
-          </label>
-          <button
-            className="button danger"
+            <span className="font-medium">Choisir un PDF</span>
+            <Badge variant="secondary" className="font-mono text-[0.72rem]">
+              pdfjs-dist
+            </Badge>
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
             onClick={onClearAll}
             disabled={entryCount === 0 || uploadDisabled}
           >
             Clear All
-          </button>
-          <div className="badge">
-            <span className="badge-dot" />
+          </Button>
+          <Badge variant="outline" className="gap-1.5 py-0.5 pr-2 pl-2">
+            <span
+              className="size-1.5 shrink-0 rounded-full bg-green-500"
+              aria-hidden
+            />
             <span>{entryCount} entrées</span>
-          </div>
+          </Badge>
         </div>
       </div>
 
       {selectedBookName && (
-        <div className="toc-range-bar">
-          <span className="toc-range-label">
-            Table des matières
-          </span>
-          <div className="toc-range-inputs">
-            <label className="toc-range-field">
-              <span className="toc-range-field-caption">Début</span>
-              <input
-                type="number"
-                className="toc-range-input monospace"
-                min={1}
-                step={1}
-                value={tocStartInput}
-                onChange={onTocStartChange}
-                placeholder="ex. 5"
-                aria-invalid={!!tocRangeHint}
+        <Card size="sm" className="mb-4 border-border/80 bg-muted/15">
+          <CardContent className="flex flex-col gap-3 px-4 pb-4">
+            <div className="flex flex-wrap items-end gap-2.5">
+              <div className="flex flex-col gap-1">
+                <span className="text-[0.68rem] font-medium tracking-wide text-muted-foreground uppercase">
+                  Début TOC
+                </span>
+                <Input
+                  type="number"
+                  className="w-[5.5rem] font-mono"
+                  min={1}
+                  step={1}
+                  value={tocStartInput}
+                  onChange={onTocStartChange}
+                  placeholder="ex. 5"
+                  aria-invalid={!!tocRangeHint}
+                />
+              </div>
+              <span className="pb-2 text-[0.85rem] text-muted-foreground">
+                —
+              </span>
+              <div className="flex flex-col gap-1">
+                <span className="text-[0.68rem] font-medium tracking-wide text-muted-foreground uppercase">
+                  Fin TOC
+                </span>
+                <Input
+                  type="number"
+                  className="w-[5.5rem] font-mono"
+                  min={1}
+                  step={1}
+                  value={tocEndInput}
+                  onChange={onTocEndChange}
+                  placeholder="ex. 12"
+                  aria-invalid={!!tocRangeHint}
+                />
+              </div>
+            </div>
+            <div className="flex min-w-0 max-w-full flex-col gap-1">
+              <Label
+                htmlFor="symbol-prefix"
+                className="text-[0.68rem] font-medium tracking-wide text-muted-foreground uppercase"
+              >
+                Préfixe symbole
+              </Label>
+              <Input
+                id="symbol-prefix"
+                type="text"
+                className="max-w-[14rem] font-mono"
+                value={symbolPrefixInput}
+                onChange={onSymbolPrefixChange}
+                placeholder="A/C.3/SR."
+                maxLength={80}
+                spellCheck={false}
+                aria-label="Préfixe symbole des documents"
               />
-            </label>
-            <span className="toc-range-sep">—</span>
-            <label className="toc-range-field">
-              <span className="toc-range-field-caption">Fin</span>
-              <input
-                type="number"
-                className="toc-range-input monospace"
-                min={1}
-                step={1}
-                value={tocEndInput}
-                onChange={onTocEndChange}
-                placeholder="ex. 12"
-                aria-invalid={!!tocRangeHint}
+            </div>
+            <div className="flex min-w-0 w-full flex-col gap-1">
+              <Label
+                htmlFor="session-title-pattern"
+                className="text-[0.68rem] font-medium tracking-wide text-muted-foreground uppercase"
+              >
+                Modèle du titre de session
+              </Label>
+              <Textarea
+                id="session-title-pattern"
+                className="min-h-[2.75rem] resize-y font-mono text-[0.8rem] leading-snug"
+                value={sessionTitlePatternInput}
+                onChange={onSessionTitlePatternChange}
+                rows={2}
+                spellCheck={false}
+                placeholder="{sessionNumber}-{sessionDate}"
+                aria-label="Modèle du titre de session ({sessionNumber}, {sessionDate})"
               />
-            </label>
-          </div>
-          <label className="toc-range-field toc-range-field-prefix">
-            <span className="toc-range-field-caption">Préfixe symbole</span>
-            <input
-              type="text"
-              className="toc-range-input toc-range-input-prefix monospace"
-              value={symbolPrefixInput}
-              onChange={onSymbolPrefixChange}
-              placeholder="A/C.3/SR."
-              maxLength={80}
-              spellCheck={false}
-              aria-label="Préfixe symbole des documents"
-            />
-          </label>
-          <label className="toc-range-field toc-range-field-pattern">
-            <span className="toc-range-field-caption">
-              Modèle du titre de session
-            </span>
-            <textarea
-              className="toc-range-textarea-pattern"
-              value={sessionTitlePatternInput}
-              onChange={onSessionTitlePatternChange}
-              rows={2}
-              spellCheck={false}
-              placeholder="{sessionNumber}-{sessionDate}"
-              aria-label="Modèle du titre de session ({sessionNumber}, {sessionDate})"
-            />
-          </label>
-          {tocRangeHint && (
-            <p className="toc-range-hint" role="status">
-              {tocRangeHint}
-            </p>
-          )}
-        </div>
+            </div>
+            {tocRangeHint && (
+              <p
+                className="m-0 text-[0.75rem] text-destructive leading-snug"
+                role="status"
+              >
+                {tocRangeHint}
+              </p>
+            )}
+          </CardContent>
+        </Card>
       )}
 
-      {status && <div className="status">{loading ? `⏳ ${status}` : status}</div>}
     </>
   );
 }
