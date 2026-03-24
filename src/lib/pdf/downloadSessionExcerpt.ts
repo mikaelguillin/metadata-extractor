@@ -76,6 +76,8 @@ export async function downloadSessionExcerptPdf(params: {
   outPdf.setTitle(entry.sessionTitle);
   outPdf.setAuthor("Nations Unies");
   outPdf.setSubject(entry.description);
+  outPdf.setCustomMetadata("Language", "French");
+  outPdf.setCustomMetadata("Symbol", entry.symbol);
 
   const bytes = await outPdf.save();
   const blob = new Blob([new Uint8Array(bytes)], { type: "application/pdf" });

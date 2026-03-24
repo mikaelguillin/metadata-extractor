@@ -6,15 +6,17 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postinstall": "node scripts/bundle-pdf-lib.mjs"
   },
   "dependencies": {
-    "pdf-lib": "^1.17.1",
+    "pdf-lib": "git+https://github.com/mikaelguillin/pdf-lib.git#copilot/add-custom-metadata-to-pdf",
     "pdfjs-dist": "^4.10.38",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "esbuild": "^0.25.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react-swc": "^3.7.1",
