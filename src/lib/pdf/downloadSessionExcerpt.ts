@@ -73,6 +73,10 @@ export async function downloadSessionExcerptPdf(params: {
   const copied = await outPdf.copyPages(srcPdf, zeroBased);
   copied.forEach((page) => outPdf.addPage(page));
 
+  outPdf.setTitle(entry.sessionTitle);
+  outPdf.setAuthor("Nations Unies");
+  outPdf.setSubject(entry.description);
+
   const bytes = await outPdf.save();
   const blob = new Blob([new Uint8Array(bytes)], { type: "application/pdf" });
   triggerDownload(blob, excerptFilename(entry.symbol));
