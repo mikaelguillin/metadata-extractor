@@ -125,6 +125,7 @@ export function usePersistedBooks() {
       patch: Partial<
         Pick<
           Book,
+          | "name"
           | "symbolPrefix"
           | "pdfFileName"
           | "pdfBlobKey"

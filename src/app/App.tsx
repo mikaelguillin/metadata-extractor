@@ -296,6 +296,7 @@ export const App: React.FC = () => {
           selectedBookId={selectedBookId}
           onSelect={selectBook}
           onAdd={addBook}
+          onRename={(id, nextName) => patchBook(id, { name: nextName })}
           onDelete={deleteBook}
         />
         <div className="main-column">
