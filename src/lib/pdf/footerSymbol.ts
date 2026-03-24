@@ -48,6 +48,7 @@ function buildLineInRegion(items: FlatTextItem[], region: Rect): string {
     if (i > 0 && needsSpaceBetween(sorted[i - 1], sorted[i])) out += " ";
     out += sorted[i].str;
   }
+  console.log({out})
   return out.trim();
 }
 
