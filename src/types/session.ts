@@ -5,6 +5,8 @@ export type SessionEntry = {
   /** Full symbol: book `symbolPrefix` + `sessionNumber` (persisted). */
   symbol: string;
   dateText: string;
+  /** Formatted from the book pattern, session number, and date (recomputed when those change). */
+  sessionTitle: string;
   description: string;
 };
 

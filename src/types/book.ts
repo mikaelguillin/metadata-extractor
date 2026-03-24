@@ -5,6 +5,10 @@ export type Book = {
   name: string;
   /** Prepended to each entry’s session number to form `SessionEntry.symbol`. */
   symbolPrefix: string;
+  /**
+   * Template for each entry’s `sessionTitle`. Placeholders: `{sessionNumber}`, `{sessionDate}`.
+   */
+  sessionTitlePattern: string;
   /** Last uploaded PDF file name; cleared when book has no extraction. */
   pdfFileName: string | null;
   /**

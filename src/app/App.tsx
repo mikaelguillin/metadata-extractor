@@ -9,6 +9,10 @@ import { usePersistedBooks } from "../hooks/usePersistedBooks";
 import { downloadSessionExcerptPdf } from "../lib/pdf/downloadSessionExcerpt";
 import { extractTextItems } from "../lib/pdf/extractTextItems";
 import { buildSessions } from "../lib/sessions/buildSessions";
+import {
+  effectiveSessionTitlePattern,
+  sessionTitleFromFields,
+} from "../lib/sessions/sessionTitlePattern";
 import { savePdfBlob } from "../lib/storage/pdfBlobStore";
 import type { SessionEntry } from "../types/session";
 
@@ -38,6 +42,8 @@ export const App: React.FC = () => {
   const [tocStartInput, setTocStartInput] = useState("");
   const [tocEndInput, setTocEndInput] = useState("");
   const [symbolPrefixInput, setSymbolPrefixInput] = useState("");
+  const [sessionTitlePatternInput, setSessionTitlePatternInput] =
+    useState("");
 
   const selectedBookRef = useRef(selectedBook);
   selectedBookRef.current = selectedBook;
@@ -69,6 +75,14 @@ export const App: React.FC = () => {
   }, [selectedBookId, selectedBook?.symbolPrefix]);
 
   useEffect(() => {
+    if (!selectedBook) {
+      setSessionTitlePatternInput("");
+      return;
+    }
+    setSessionTitlePatternInput(selectedBook.sessionTitlePattern);
+  }, [selectedBookId, selectedBook?.sessionTitlePattern]);
+
+  useEffect(() => {
     if (!selectedBookId) return;
     const t = window.setTimeout(() => {
       const book = selectedBookRef.current;
@@ -84,6 +98,33 @@ export const App: React.FC = () => {
     }, 350);
     return () => clearTimeout(t);
   }, [symbolPrefixInput, selectedBookId, patchBook]);
+
+  useEffect(() => {
+    if (!selectedBookId) return;
+    const t = window.setTimeout(() => {
+      const book = selectedBookRef.current;
+      if (!book || book.id !== selectedBookId) return;
+      const nextPattern = effectiveSessionTitlePattern(
+        sessionTitlePatternInput,
+      );
+      const bookPattern = effectiveSessionTitlePattern(
+        book.sessionTitlePattern,
+      );
+      if (nextPattern === bookPattern) return;
+      patchBook(selectedBookId, {
+        sessionTitlePattern: nextPattern,
+        entries: book.entries.map((e) => ({
+          ...e,
+          sessionTitle: sessionTitleFromFields(
+            nextPattern,
+            e.sessionNumber,
+            e.dateText,
+          ),
+        })),
+      });
+    }, 350);
+    return () => clearTimeout(t);
+  }, [sessionTitlePatternInput, selectedBookId, patchBook]);
 
   const tocRange = useMemo(() => {
     const start = parsePositiveInt(tocStartInput);
@@ -160,6 +201,7 @@ export const App: React.FC = () => {
           items: p.items,
         })),
         symbolPrefixInput,
+        effectiveSessionTitlePattern(sessionTitlePatternInput),
       );
 
       await savePdfBlob(selectedBookId, arrayBuffer);
@@ -170,6 +212,9 @@ export const App: React.FC = () => {
         tocPageStart: tocRange.start,
         tocPageEnd: tocRange.end,
         symbolPrefix: symbolPrefixInput,
+        sessionTitlePattern: effectiveSessionTitlePattern(
+          sessionTitlePatternInput,
+        ),
         entries: sessions,
       });
       setStatus(`Terminé. ${sessions.length} document(s) détectée(s) (pages ToC ${tocRange.start}–${tocRange.end}).`);
@@ -208,23 +253,40 @@ export const App: React.FC = () => {
 
   const handleUpdateEntry = (
     id: string,
-    updates: Pick<
-      SessionEntry,
-      "sessionNumber" | "dateText" | "description"
+    updates: Partial<
+      Pick<SessionEntry, "sessionNumber" | "dateText" | "description">
     >,
   ) => {
     if (!selectedBookId || !selectedBook) return;
     const prefix = symbolPrefixInput;
-    const withSymbol =
-      updates.sessionNumber !== undefined
-        ? {
-            ...updates,
-            symbol: prefix + updates.sessionNumber.trim(),
-          }
-        : updates;
-    const next = selectedBook.entries.map((entry) =>
-      entry.id === id ? { ...entry, ...withSymbol } : entry,
+    const pattern = effectiveSessionTitlePattern(
+      selectedBook.sessionTitlePattern,
     );
+    const next = selectedBook.entries.map((entry) => {
+      if (entry.id !== id) return entry;
+      const merged = { ...entry };
+      if (updates.sessionNumber !== undefined) {
+        merged.sessionNumber = updates.sessionNumber.trim();
+        merged.symbol = prefix + merged.sessionNumber;
+      }
+      if (updates.dateText !== undefined) {
+        merged.dateText = updates.dateText.trim();
+      }
+      if (updates.description !== undefined) {
+        merged.description = updates.description.trim();
+      }
+      if (
+        updates.sessionNumber !== undefined ||
+        updates.dateText !== undefined
+      ) {
+        merged.sessionTitle = sessionTitleFromFields(
+          pattern,
+          merged.sessionNumber,
+          merged.dateText,
+        );
+      }
+      return merged;
+    });
     patchBook(selectedBookId, { entries: next });
   };
 
@@ -232,6 +294,12 @@ export const App: React.FC = () => {
     ev,
   ) => {
     setSymbolPrefixInput(ev.target.value);
+  };
+
+  const handleSessionTitlePatternChange: React.ChangeEventHandler<
+    HTMLTextAreaElement
+  > = (ev) => {
+    setSessionTitlePatternInput(ev.target.value);
   };
 
   const handleClearAll = () => {
@@ -313,6 +381,8 @@ export const App: React.FC = () => {
             tocRangeHint={tocRangeHint}
             symbolPrefixInput={symbolPrefixInput}
             onSymbolPrefixChange={handleSymbolPrefixChange}
+            sessionTitlePatternInput={sessionTitlePatternInput}
+            onSessionTitlePatternChange={handleSessionTitlePatternChange}
             onFileChange={handleFileChange}
             onClearAll={handleClearAll}
           />
@@ -320,6 +390,9 @@ export const App: React.FC = () => {
           <div className="table-wrapper">
             <SessionsTable
               entries={entries}
+              sessionTitlePattern={effectiveSessionTitlePattern(
+                sessionTitlePatternInput,
+              )}
               emptyMessage={emptyTableMessage}
               onDelete={handleDeleteEntry}
               onUpdateEntry={handleUpdateEntry}

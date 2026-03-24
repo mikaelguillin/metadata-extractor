@@ -4,19 +4,20 @@ import {
   useRef,
   useState,
 } from "react";
+import { sessionTitleFromFields } from "../lib/sessions/sessionTitlePattern";
 import type { SessionEntry } from "../types/session";
 
 const SAVE_DEBOUNCE_MS = 400;
 
 type SessionsTableProps = {
   entries: SessionEntry[];
+  sessionTitlePattern: string;
   emptyMessage: string;
   onDelete: (id: string) => void;
   onUpdateEntry: (
     id: string,
-    updates: Pick<
-      SessionEntry,
-      "sessionNumber" | "dateText" | "description"
+    updates: Partial<
+      Pick<SessionEntry, "sessionNumber" | "dateText" | "description">
     >,
   ) => void;
   excerptDownloadEnabled?: boolean;
@@ -26,6 +27,7 @@ type SessionsTableProps = {
 
 function SessionRow({
   entry,
+  sessionTitlePattern,
   onDelete,
   onUpdateEntry,
   excerptDownloadEnabled,
@@ -33,6 +35,7 @@ function SessionRow({
   onDownloadExcerpt,
 }: {
   entry: SessionEntry;
+  sessionTitlePattern: string;
   onDelete: (id: string) => void;
   onUpdateEntry: SessionsTableProps["onUpdateEntry"];
   excerptDownloadEnabled: boolean;
@@ -50,7 +53,7 @@ function SessionRow({
   dateRef.current = dateText;
   descriptionRef.current = description;
 
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const restDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setSessionNumber(entry.sessionNumber);
@@ -60,22 +63,22 @@ function SessionRow({
 
   useEffect(
     () => () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (restDebounceRef.current) clearTimeout(restDebounceRef.current);
     },
     [],
   );
 
-  const flushDebouncedSave = useCallback(() => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-      debounceRef.current = null;
+  const flushRestDebounced = useCallback(() => {
+    if (restDebounceRef.current) {
+      clearTimeout(restDebounceRef.current);
+      restDebounceRef.current = null;
     }
   }, []);
 
-  const scheduleSave = useCallback(() => {
-    flushDebouncedSave();
-    debounceRef.current = setTimeout(() => {
-      debounceRef.current = null;
+  const scheduleRestSave = useCallback(() => {
+    flushRestDebounced();
+    restDebounceRef.current = setTimeout(() => {
+      restDebounceRef.current = null;
       const num = sessionNumberRef.current.trim();
       const d = dateRef.current.trim();
       const desc = descriptionRef.current.trim();
@@ -97,12 +100,12 @@ function SessionRow({
     entry.dateText,
     entry.description,
     entry.id,
-    flushDebouncedSave,
+    flushRestDebounced,
     onUpdateEntry,
   ]);
 
-  const handleBlur = useCallback(() => {
-    flushDebouncedSave();
+  const handleBlurRest = useCallback(() => {
+    flushRestDebounced();
     const num = sessionNumberRef.current.trim();
     const d = dateRef.current.trim();
     const desc = descriptionRef.current.trim();
@@ -128,13 +131,20 @@ function SessionRow({
     entry.dateText,
     entry.description,
     entry.id,
-    flushDebouncedSave,
+    flushRestDebounced,
     onUpdateEntry,
   ]);
 
   const sessionNoId = `session-no-${entry.id}`;
   const dateId = `session-date-${entry.id}`;
+  const titleId = `session-title-${entry.id}`;
   const descId = `session-desc-${entry.id}`;
+
+  const displayedTitle = sessionTitleFromFields(
+    sessionTitlePattern,
+    sessionNumber,
+    dateText,
+  );
 
   return (
     <li className="session-card">
@@ -157,10 +167,10 @@ function SessionRow({
             value={sessionNumber}
             onChange={(e) => {
               setSessionNumber(e.target.value);
-              scheduleSave();
+              scheduleRestSave();
             }}
-            onBlur={handleBlur}
-            spellCheck="false"
+            onBlur={handleBlurRest}
+            spellCheck={false}
           />
         </div>
         <div className="session-field">
@@ -174,11 +184,24 @@ function SessionRow({
             value={dateText}
             onChange={(e) => {
               setDateText(e.target.value);
-              scheduleSave();
+              scheduleRestSave();
             }}
-            onBlur={handleBlur}
-            spellCheck="true"
+            onBlur={handleBlurRest}
+            spellCheck={true}
             lang="fr"
+          />
+        </div>
+        <div className="session-field">
+          <label className="session-field-label" htmlFor={titleId}>
+            Title
+          </label>
+          <input
+            id={titleId}
+            className="session-field-input"
+            readOnly
+            aria-readonly="true"
+            value={displayedTitle}
+            spellCheck={false}
           />
         </div>
         <div className="session-field">
@@ -191,11 +214,11 @@ function SessionRow({
             value={description}
             onChange={(e) => {
               setDescription(e.target.value);
-              scheduleSave();
+              scheduleRestSave();
             }}
-            onBlur={handleBlur}
+            onBlur={handleBlurRest}
             rows={10}
-            spellCheck="true"
+            spellCheck={true}
             lang="fr"
           />
         </div>
@@ -219,7 +242,10 @@ function SessionRow({
         <button
           type="button"
           className="button danger"
-          onClick={() => onDelete(entry.id)}
+          onClick={() => {
+            flushRestDebounced();
+            onDelete(entry.id);
+          }}
         >
           Delete
         </button>
@@ -230,6 +256,7 @@ function SessionRow({
 
 export function SessionsTable({
   entries,
+  sessionTitlePattern,
   emptyMessage,
   onDelete,
   onUpdateEntry,
@@ -247,6 +274,7 @@ export function SessionsTable({
         <SessionRow
           key={entry.id}
           entry={entry}
+          sessionTitlePattern={sessionTitlePattern}
           onDelete={onDelete}
           onUpdateEntry={onUpdateEntry}
           excerptDownloadEnabled={excerptDownloadEnabled}

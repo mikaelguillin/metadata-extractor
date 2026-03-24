@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { extractSessionNumber } from "../lib/sessions/lineHeuristics";
+import {
+  DEFAULT_SESSION_TITLE_PATTERN,
+  effectiveSessionTitlePattern,
+  sessionTitleFromFields,
+} from "../lib/sessions/sessionTitlePattern";
 import { deletePdfBlob } from "../lib/storage/pdfBlobStore";
 import type { Book } from "../types/book";
 import type { SessionEntry } from "../types/session";
@@ -33,26 +38,52 @@ export function usePersistedBooks() {
       const symbolPrefixDefault = "";
       const books = parsed.books.map((b) => {
         const symbolPrefix = b.symbolPrefix ?? symbolPrefixDefault;
+        const sessionTitlePattern = effectiveSessionTitlePattern(
+          b.sessionTitlePattern ?? "",
+        );
         return {
           ...b,
           symbolPrefix,
+          sessionTitlePattern,
           pdfBlobKey: b.pdfBlobKey ?? null,
           tocPageStart: b.tocPageStart ?? null,
           tocPageEnd: b.tocPageEnd ?? null,
           entries: (b.entries ?? []).map((e) => {
-            const legacy = e as SessionEntry & { sessionLabel?: string };
+            const legacy = e as SessionEntry & {
+              sessionLabel?: string;
+              sessionTitleManual?: boolean;
+            };
             const sessionNumber =
               legacy.sessionNumber ??
               (legacy.sessionLabel != null
                 ? extractSessionNumber(legacy.sessionLabel) ||
                   String(legacy.sessionLabel).trim()
                 : "");
-            const { sessionLabel: _omit, symbol: _prevSym, ...rest } = legacy;
+            const {
+              sessionLabel: _omit,
+              symbol: _prevSym,
+              sessionTitle: _legacyTitle,
+              sessionTitleManual: _legacyManual,
+              ...rest
+            } = legacy;
             const symbol =
               legacy.symbol != null && String(legacy.symbol).trim() !== ""
                 ? String(legacy.symbol)
                 : symbolPrefix + "SR." + sessionNumber;
-            return { ...rest, sessionNumber, symbol };
+            const dateText =
+              legacy.dateText != null ? String(legacy.dateText) : "";
+            const sessionTitle = sessionTitleFromFields(
+              sessionTitlePattern,
+              sessionNumber,
+              dateText,
+            );
+            return {
+              ...rest,
+              sessionNumber,
+              symbol,
+              dateText,
+              sessionTitle,
+            };
           }),
         };
       });
@@ -76,6 +107,7 @@ export function usePersistedBooks() {
         id,
         name,
         symbolPrefix: "",
+        sessionTitlePattern: DEFAULT_SESSION_TITLE_PATTERN,
         pdfFileName: null,
         pdfBlobKey: null,
         tocPageStart: null,
@@ -127,6 +159,7 @@ export function usePersistedBooks() {
           Book,
           | "name"
           | "symbolPrefix"
+          | "sessionTitlePattern"
           | "pdfFileName"
           | "pdfBlobKey"
           | "entries"

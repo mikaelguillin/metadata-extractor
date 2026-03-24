@@ -13,6 +13,8 @@ type AppHeaderProps = {
   tocRangeHint: string | null;
   symbolPrefixInput: string;
   onSymbolPrefixChange: React.ChangeEventHandler<HTMLInputElement>;
+  sessionTitlePatternInput: string;
+  onSessionTitlePatternChange: React.ChangeEventHandler<HTMLTextAreaElement>;
   onFileChange: React.ChangeEventHandler<HTMLInputElement>;
   onClearAll: () => void;
 };
@@ -30,6 +32,8 @@ export function AppHeader({
   tocRangeHint,
   symbolPrefixInput,
   onSymbolPrefixChange,
+  sessionTitlePatternInput,
+  onSessionTitlePatternChange,
   onFileChange,
   onClearAll,
 }: AppHeaderProps) {
@@ -121,6 +125,20 @@ export function AppHeader({
               maxLength={80}
               spellCheck={false}
               aria-label="Préfixe symbole des documents"
+            />
+          </label>
+          <label className="toc-range-field toc-range-field-pattern">
+            <span className="toc-range-field-caption">
+              Modèle du titre de session
+            </span>
+            <textarea
+              className="toc-range-textarea-pattern"
+              value={sessionTitlePatternInput}
+              onChange={onSessionTitlePatternChange}
+              rows={2}
+              spellCheck={false}
+              placeholder="{sessionNumber}-{sessionDate}"
+              aria-label="Modèle du titre de session ({sessionNumber}, {sessionDate})"
             />
           </label>
           {tocRangeHint && (

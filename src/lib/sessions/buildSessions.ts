@@ -1,5 +1,9 @@
 import type { SessionEntry, FlatTextItem } from "../../types/session";
 import {
+  DEFAULT_SESSION_TITLE_PATTERN,
+  sessionTitleFromFields,
+} from "./sessionTitlePattern";
+import {
   SAME_LINE_TOL,
   needsSpaceBetween,
   isNoiseLine,
@@ -16,6 +20,7 @@ export function buildSessions(
     items: FlatTextItem[];
   }[],
   symbolPrefix = "",
+  sessionTitlePattern = DEFAULT_SESSION_TITLE_PATTERN,
 ): SessionEntry[] {
   const sessions: SessionEntry[] = [];
 
@@ -32,6 +37,11 @@ export function buildSessions(
         sessionNumber: currentSessionNumber,
         symbol: symbolPrefix + "SR." + currentSessionNumber,
         dateText: currentDate,
+        sessionTitle: sessionTitleFromFields(
+          sessionTitlePattern,
+          currentSessionNumber,
+          currentDate,
+        ),
         description: currentDescription
           .filter((line) => !isFrenchDate(line))
           .join("\n")
