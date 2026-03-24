@@ -49,10 +49,14 @@ export async function downloadSessionExcerptPdf(params: {
   const loadingTask = pdfjsLib.getDocument({ data: buffer.slice(0) });
   const doc = await loadingTask.promise;
 
+  const knownSessionSymbols = new Set(
+    entries.map((e) => e.symbol.trim()),
+  );
   const range = await findExcerptPageRangeForSymbol(
     doc,
     tocPageEnd,
     entry.symbol,
+    knownSessionSymbols,
   );
   if (!range) {
     throw new Error(

@@ -64,7 +64,10 @@ export type ExcerptPageRange = { start: number; end: number };
 
 /**
  * Finds the page range for one session: first footer match for `symbol` after the ToC,
- * through consecutive pages whose footer still equals that symbol.
+ * through the last page before a different known session symbol appears in the footer.
+ *
+ * Intermediate pages may have empty footers or non-symbol text; only footers that equal
+ * another entry in `knownSessionSymbols` (other than `symbol`) end the range.
  *
  * This does not depend on table row order. ToC order can differ from body order without
  * mixing up excerpts.
@@ -73,6 +76,7 @@ export async function findExcerptPageRangeForSymbol(
   doc: PDFDocumentProxy,
   tocPageEnd: number,
   symbol: string,
+  knownSessionSymbols: Set<string>,
 ): Promise<ExcerptPageRange | null> {
   const sym = symbol.trim();
   const numPages = doc.numPages;
@@ -90,9 +94,15 @@ export async function findExcerptPageRangeForSymbol(
 
   let end = start;
   for (let p = start + 1; p <= numPages; p++) {
-    const line = await readFooterLine(doc, p);
-    if (line === sym) end = p;
-    else break;
+    const line = (await readFooterLine(doc, p)).trim();
+    if (
+      line !== "" &&
+      knownSessionSymbols.has(line) &&
+      line !== sym
+    ) {
+      break;
+    }
+    end = p;
   }
 
   return { start, end };
