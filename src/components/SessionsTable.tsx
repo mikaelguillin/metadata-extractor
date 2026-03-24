@@ -236,7 +236,7 @@ function SessionRow({
             }
             onClick={() => onDownloadExcerpt(entry.id)}
           >
-            {excerptDownloading ? "…" : "PDF extrait"}
+            {excerptDownloading ? "…" : "Download PDF"}
           </button>
         )}
         <button
