@@ -121,7 +121,7 @@ export function AppHeader({
               className="toc-range-input toc-range-input-prefix monospace"
               value={symbolPrefixInput}
               onChange={onSymbolPrefixChange}
-              placeholder="A/C.3/"
+              placeholder="A/C.3/SR."
               maxLength={80}
               spellCheck={false}
               aria-label="Préfixe symbole des documents"

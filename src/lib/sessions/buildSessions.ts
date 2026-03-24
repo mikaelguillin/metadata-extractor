@@ -35,7 +35,7 @@ export function buildSessions(
         id: `${currentPage}-${sessions.length}-${Date.now()}`,
         page: currentPage,
         sessionNumber: currentSessionNumber,
-        symbol: symbolPrefix + "SR." + currentSessionNumber,
+        symbol: symbolPrefix + currentSessionNumber,
         dateText: currentDate,
         sessionTitle: sessionTitleFromFields(
           sessionTitlePattern,

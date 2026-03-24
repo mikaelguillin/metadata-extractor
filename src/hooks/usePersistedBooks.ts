@@ -69,7 +69,7 @@ export function usePersistedBooks() {
             const symbol =
               legacy.symbol != null && String(legacy.symbol).trim() !== ""
                 ? String(legacy.symbol)
-                : symbolPrefix + "SR." + sessionNumber;
+                : symbolPrefix + sessionNumber;
             const dateText =
               legacy.dateText != null ? String(legacy.dateText) : "";
             const sessionTitle = sessionTitleFromFields(
