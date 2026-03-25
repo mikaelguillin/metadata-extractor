@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const SAVE_DEBOUNCE_MS = 400;
 
@@ -157,6 +158,8 @@ function SessionRow({
   const fieldCaption =
     "text-[0.72rem] font-medium tracking-wide text-muted-foreground uppercase";
 
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
   return (
     <li className="list-none">
       <Card
@@ -261,13 +264,27 @@ function SessionRow({
             size="sm"
             onClick={() => {
               flushRestDebounced();
-              onDelete(entry.id);
+              setDeleteDialogOpen(true);
             }}
           >
             Delete
           </Button>
         </div>
       </Card>
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete this entry?"
+        description={
+          <>
+            This removes the row for symbol{" "}
+            <span className="font-mono text-foreground">{entry.symbol}</span>.
+            This cannot be undone.
+          </>
+        }
+        confirmLabel="Delete"
+        onConfirm={() => onDelete(entry.id)}
+      />
     </li>
   );
 }

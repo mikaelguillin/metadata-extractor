@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 type BooksPanelProps = {
   books: Book[];
@@ -32,6 +33,8 @@ export function BooksPanel({
   const [name, setName] = useState("");
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameDraft, setRenameDraft] = useState("");
+  const [bookDeleteDialogOpen, setBookDeleteDialogOpen] = useState(false);
+  const [bookToDelete, setBookToDelete] = useState<Book | null>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -179,7 +182,10 @@ export function BooksPanel({
                       variant="destructive"
                       size="icon-sm"
                       className="shrink-0 text-lg leading-none"
-                      onClick={() => onDelete(book.id)}
+                      onClick={() => {
+                        setBookToDelete(book);
+                        setBookDeleteDialogOpen(true);
+                      }}
                       disabled={isRenaming}
                       aria-label={`Supprimer ${book.name}`}
                     >
@@ -192,6 +198,27 @@ export function BooksPanel({
           )}
         </CardContent>
       </Card>
+      <ConfirmDialog
+        open={bookDeleteDialogOpen}
+        onOpenChange={setBookDeleteDialogOpen}
+        onOpenChangeComplete={(opened) => {
+          if (!opened) setBookToDelete(null);
+        }}
+        title="Supprimer ce livre ?"
+        description={
+          bookToDelete ? (
+            <>
+              « {bookToDelete.name} » et ses données locales seront supprimés.
+              Cette action est irréversible.
+            </>
+          ) : null
+        }
+        cancelLabel="Annuler"
+        confirmLabel="Supprimer"
+        onConfirm={() => {
+          if (bookToDelete) onDelete(bookToDelete.id);
+        }}
+      />
     </aside>
   );
 }

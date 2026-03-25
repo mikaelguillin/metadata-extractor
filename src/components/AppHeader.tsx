@@ -1,11 +1,12 @@
 import type React from "react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 type AppHeaderProps = {
   selectedBookName: string | null;
@@ -43,6 +44,7 @@ export function AppHeader({
   onClearAll,
 }: AppHeaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [clearAllOpen, setClearAllOpen] = useState(false);
 
   return (
     <>
@@ -93,7 +95,7 @@ export function AppHeader({
             type="button"
             variant="destructive"
             size="sm"
-            onClick={onClearAll}
+            onClick={() => setClearAllOpen(true)}
             disabled={entryCount === 0 || uploadDisabled}
           >
             Clear All
@@ -195,6 +197,19 @@ export function AppHeader({
         </Card>
       )}
 
+      <ConfirmDialog
+        open={clearAllOpen}
+        onOpenChange={setClearAllOpen}
+        title="Clear all entries?"
+        description={
+          <>
+            All {entryCount} entrée{entryCount === 1 ? "" : "s"} for this book
+            will be removed. This cannot be undone.
+          </>
+        }
+        confirmLabel="Clear all"
+        onConfirm={onClearAll}
+      />
     </>
   );
 }
