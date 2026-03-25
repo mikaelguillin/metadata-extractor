@@ -1,19 +1,19 @@
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppHeader } from "./AppHeader";
-import { SessionsTable } from "./SessionsTable";
+import { MeetingsTable } from "./MeetingsTable";
 import { useBookPdfUpload } from "../hooks/useBookPdfUpload";
-import { downloadSessionExcerptPdf } from "../lib/pdf/downloadSessionExcerpt";
+import { downloadMeetingExcerptPdf } from "../lib/pdf/downloadMeetingExcerpt";
 import {
-  effectiveSessionTitlePattern,
-  sessionTitleFromFields,
-} from "../lib/sessions/sessionTitlePattern";
+  effectiveMeetingTitlePattern,
+  meetingTitleFromFields,
+} from "../lib/meetings/meetingTitlePattern";
 import {
   computeTocRange,
   computeTocRangeHint,
 } from "../lib/tocRange";
 import type { Book } from "../types/book";
-import type { SessionEntry } from "../types/session";
+import type { MeetingEntry } from "../types/meeting";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { appToastManager } from "@/lib/appToast";
 
@@ -24,7 +24,7 @@ type PatchBook = (
       Book,
       | "name"
       | "symbolPrefix"
-      | "sessionTitlePattern"
+      | "meetingTitlePattern"
       | "pdfFileName"
       | "pdfBlobKey"
       | "entries"
@@ -57,8 +57,8 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
   const [symbolPrefixInput, setSymbolPrefixInput] = useState(
     () => book?.symbolPrefix ?? "",
   );
-  const [sessionTitlePatternInput, setSessionTitlePatternInput] = useState(
-    () => book?.sessionTitlePattern ?? "",
+  const [meetingTitlePatternInput, setMeetingTitlePatternInput] = useState(
+    () => book?.meetingTitlePattern ?? "",
   );
 
   const bookRef = useRef(book);
@@ -93,7 +93,7 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
     bookId,
     tocRange,
     symbolPrefixInput,
-    sessionTitlePatternInput,
+    meetingTitlePatternInput,
     patchBook,
   });
 
@@ -114,7 +114,7 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
           symbolPrefix: value,
           entries: b.entries.map((e) => ({
             ...e,
-            symbol: value + e.sessionNumber,
+            symbol: value + e.meetingNumber,
           })),
         });
       }, 350);
@@ -122,7 +122,7 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
     [bookId, patchBook],
   );
 
-  const scheduleSessionTitlePatternPatch = useCallback(
+  const scheduleMeetingTitlePatternPatch = useCallback(
     (rawInput: string) => {
       if (!bookId) return;
       if (patternPatchTimerRef.current != null) {
@@ -132,16 +132,16 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
         patternPatchTimerRef.current = null;
         const b = bookRef.current;
         if (!b || b.id !== bookId) return;
-        const nextPattern = effectiveSessionTitlePattern(rawInput);
-        const bookPattern = effectiveSessionTitlePattern(b.sessionTitlePattern);
+        const nextPattern = effectiveMeetingTitlePattern(rawInput);
+        const bookPattern = effectiveMeetingTitlePattern(b.meetingTitlePattern);
         if (nextPattern === bookPattern) return;
         patchBook(bookId, {
-          sessionTitlePattern: nextPattern,
+          meetingTitlePattern: nextPattern,
           entries: b.entries.map((e) => ({
             ...e,
-            sessionTitle: sessionTitleFromFields(
+            meetingTitle: meetingTitleFromFields(
               nextPattern,
-              e.sessionNumber,
+              e.meetingNumber,
               e.dateText,
             ),
           })),
@@ -171,12 +171,12 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
     scheduleSymbolPrefixPatch(value);
   };
 
-  const handleSessionTitlePatternChange: React.ChangeEventHandler<
+  const handleMeetingTitlePatternChange: React.ChangeEventHandler<
     HTMLTextAreaElement
   > = (ev) => {
     const value = ev.target.value;
-    setSessionTitlePatternInput(value);
-    scheduleSessionTitlePatternPatch(value);
+    setMeetingTitlePatternInput(value);
+    scheduleMeetingTitlePatternPatch(value);
   };
 
   const handleDeleteEntry = (id: string) => {
@@ -191,18 +191,18 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
   const handleUpdateEntry = (
     id: string,
     updates: Partial<
-      Pick<SessionEntry, "sessionNumber" | "dateText" | "description">
+      Pick<MeetingEntry, "meetingNumber" | "dateText" | "description">
     >,
   ) => {
     if (!bookId || !book) return;
     const prefix = symbolPrefixInput;
-    const pattern = effectiveSessionTitlePattern(book.sessionTitlePattern);
+    const pattern = effectiveMeetingTitlePattern(book.meetingTitlePattern);
     const next = book.entries.map((entry) => {
       if (entry.id !== id) return entry;
       const merged = { ...entry };
-      if (updates.sessionNumber !== undefined) {
-        merged.sessionNumber = updates.sessionNumber.trim();
-        merged.symbol = prefix + merged.sessionNumber;
+      if (updates.meetingNumber !== undefined) {
+        merged.meetingNumber = updates.meetingNumber.trim();
+        merged.symbol = prefix + merged.meetingNumber;
       }
       if (updates.dateText !== undefined) {
         merged.dateText = updates.dateText.trim();
@@ -211,12 +211,12 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
         merged.description = updates.description.trim();
       }
       if (
-        updates.sessionNumber !== undefined ||
+        updates.meetingNumber !== undefined ||
         updates.dateText !== undefined
       ) {
-        merged.sessionTitle = sessionTitleFromFields(
+        merged.meetingTitle = meetingTitleFromFields(
           pattern,
-          merged.sessionNumber,
+          merged.meetingNumber,
           merged.dateText,
         );
       }
@@ -255,7 +255,7 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
         timeout: 0,
       });
       try {
-        await downloadSessionExcerptPdf({
+        await downloadMeetingExcerptPdf({
           bookId,
           tocPageEnd: book.tocPageEnd,
           entries: book.entries,
@@ -308,17 +308,17 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
         tocRangeHint={tocRangeHint}
         symbolPrefixInput={symbolPrefixInput}
         onSymbolPrefixChange={handleSymbolPrefixChange}
-        sessionTitlePatternInput={sessionTitlePatternInput}
-        onSessionTitlePatternChange={handleSessionTitlePatternChange}
+        meetingTitlePatternInput={meetingTitlePatternInput}
+        onMeetingTitlePatternChange={handleMeetingTitlePatternChange}
         onFileChange={handleFileChange}
         onClearAll={handleClearAll}
       />
 
       <ScrollArea className="h-[65vh] rounded-xl border border-border bg-card ring-1 ring-foreground/10">
-        <SessionsTable
+        <MeetingsTable
           entries={entries}
-          sessionTitlePattern={effectiveSessionTitlePattern(
-            sessionTitlePatternInput,
+          meetingTitlePattern={effectiveMeetingTitlePattern(
+            meetingTitlePatternInput,
           )}
           emptyMessage={emptyTableMessage}
           onDelete={handleDeleteEntry}

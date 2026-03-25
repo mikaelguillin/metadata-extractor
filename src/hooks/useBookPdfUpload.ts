@@ -2,8 +2,8 @@ import type React from "react";
 import { useCallback, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import { extractTextItems } from "../lib/pdf/extractTextItems";
-import { buildSessions } from "../lib/sessions/buildSessions";
-import { effectiveSessionTitlePattern } from "../lib/sessions/sessionTitlePattern";
+import { buildMeetings } from "../lib/meetings/buildMeetings";
+import { effectiveMeetingTitlePattern } from "../lib/meetings/meetingTitlePattern";
 import type { TocRangeResult } from "../lib/tocRange";
 import { appToastManager } from "../lib/appToast";
 import { savePdfBlob } from "../lib/storage/pdfBlobStore";
@@ -15,7 +15,7 @@ type PatchBook = (
     Pick<
       Book,
       | "symbolPrefix"
-      | "sessionTitlePattern"
+      | "meetingTitlePattern"
       | "pdfFileName"
       | "pdfBlobKey"
       | "entries"
@@ -29,7 +29,7 @@ type UseBookPdfUploadArgs = {
   bookId: string | null;
   tocRange: TocRangeResult;
   symbolPrefixInput: string;
-  sessionTitlePatternInput: string;
+  meetingTitlePatternInput: string;
   patchBook: PatchBook;
 };
 
@@ -37,7 +37,7 @@ export function useBookPdfUpload({
   bookId,
   tocRange,
   symbolPrefixInput,
-  sessionTitlePatternInput,
+  meetingTitlePatternInput,
   patchBook,
 }: UseBookPdfUploadArgs) {
   const [loading, setLoading] = useState(false);
@@ -92,13 +92,13 @@ export function useBookPdfUpload({
             description: "Texte extrait. Construction des documents…",
           });
 
-          const sessions = buildSessions(
+          const meetings = buildMeetings(
             pages.map((p) => ({
               page: p.page,
               items: p.items,
             })),
             symbolPrefixInput,
-            effectiveSessionTitlePattern(sessionTitlePatternInput),
+            effectiveMeetingTitlePattern(meetingTitlePatternInput),
           );
 
           await savePdfBlob(bookId, arrayBuffer);
@@ -109,14 +109,14 @@ export function useBookPdfUpload({
             tocPageStart: tocRange.start,
             tocPageEnd: tocRange.end,
             symbolPrefix: symbolPrefixInput,
-            sessionTitlePattern: effectiveSessionTitlePattern(
-              sessionTitlePatternInput,
+            meetingTitlePattern: effectiveMeetingTitlePattern(
+              meetingTitlePatternInput,
             ),
-            entries: sessions,
+            entries: meetings,
           });
           appToastManager.update(toastId, {
             type: "success",
-            description: `Terminé. ${sessions.length} document(s) détectée(s) (pages ToC ${tocRange.start}–${tocRange.end}).`,
+            description: `Terminé. ${meetings.length} document(s) détectée(s) (pages ToC ${tocRange.start}–${tocRange.end}).`,
             timeout: 5000,
           });
         } catch (err) {
@@ -134,7 +134,7 @@ export function useBookPdfUpload({
       [
         bookId,
         patchBook,
-        sessionTitlePatternInput,
+        meetingTitlePatternInput,
         symbolPrefixInput,
         tocRange,
       ],

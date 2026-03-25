@@ -4,8 +4,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { sessionTitleFromFields } from "../lib/sessions/sessionTitlePattern";
-import type { SessionEntry } from "../types/session";
+import { meetingTitleFromFields } from "../lib/meetings/meetingTitlePattern";
+import type { MeetingEntry } from "../types/meeting";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,15 +18,15 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const SAVE_DEBOUNCE_MS = 400;
 
-type SessionsTableProps = {
-  entries: SessionEntry[];
-  sessionTitlePattern: string;
+type MeetingsTableProps = {
+  entries: MeetingEntry[];
+  meetingTitlePattern: string;
   emptyMessage: string;
   onDelete: (id: string) => void;
   onUpdateEntry: (
     id: string,
     updates: Partial<
-      Pick<SessionEntry, "sessionNumber" | "dateText" | "description">
+      Pick<MeetingEntry, "meetingNumber" | "dateText" | "description">
     >,
   ) => void;
   excerptDownloadEnabled?: boolean;
@@ -34,41 +34,41 @@ type SessionsTableProps = {
   onDownloadExcerpt?: (id: string) => void | Promise<void>;
 };
 
-function SessionRow({
+function MeetingRow({
   entry,
-  sessionTitlePattern,
+  meetingTitlePattern,
   onDelete,
   onUpdateEntry,
   excerptDownloadEnabled,
   excerptDownloading,
   onDownloadExcerpt,
 }: {
-  entry: SessionEntry;
-  sessionTitlePattern: string;
+  entry: MeetingEntry;
+  meetingTitlePattern: string;
   onDelete: (id: string) => void;
-  onUpdateEntry: SessionsTableProps["onUpdateEntry"];
+  onUpdateEntry: MeetingsTableProps["onUpdateEntry"];
   excerptDownloadEnabled: boolean;
   excerptDownloading: boolean;
   onDownloadExcerpt?: (id: string) => void | Promise<void>;
 }) {
-  const [sessionNumber, setSessionNumber] = useState(entry.sessionNumber);
+  const [meetingNumber, setMeetingNumber] = useState(entry.meetingNumber);
   const [dateText, setDateText] = useState(entry.dateText);
   const [description, setDescription] = useState(entry.description);
 
-  const sessionNumberRef = useRef(sessionNumber);
+  const meetingNumberRef = useRef(meetingNumber);
   const dateRef = useRef(dateText);
   const descriptionRef = useRef(description);
-  sessionNumberRef.current = sessionNumber;
+  meetingNumberRef.current = meetingNumber;
   dateRef.current = dateText;
   descriptionRef.current = description;
 
   const restDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    setSessionNumber(entry.sessionNumber);
+    setMeetingNumber(entry.meetingNumber);
     setDateText(entry.dateText);
     setDescription(entry.description);
-  }, [entry.id, entry.sessionNumber, entry.dateText, entry.description]);
+  }, [entry.id, entry.meetingNumber, entry.dateText, entry.description]);
 
   useEffect(
     () => () => {
@@ -88,24 +88,24 @@ function SessionRow({
     flushRestDebounced();
     restDebounceRef.current = setTimeout(() => {
       restDebounceRef.current = null;
-      const num = sessionNumberRef.current.trim();
+      const num = meetingNumberRef.current.trim();
       const d = dateRef.current.trim();
       const desc = descriptionRef.current.trim();
       if (!num || !d || !desc) return;
       if (
-        num === entry.sessionNumber &&
+        num === entry.meetingNumber &&
         d === entry.dateText &&
         desc === entry.description
       )
         return;
       onUpdateEntry(entry.id, {
-        sessionNumber: num,
+        meetingNumber: num,
         dateText: d,
         description: desc,
       });
     }, SAVE_DEBOUNCE_MS);
   }, [
-    entry.sessionNumber,
+    entry.meetingNumber,
     entry.dateText,
     entry.description,
     entry.id,
@@ -115,28 +115,28 @@ function SessionRow({
 
   const handleBlurRest = useCallback(() => {
     flushRestDebounced();
-    const num = sessionNumberRef.current.trim();
+    const num = meetingNumberRef.current.trim();
     const d = dateRef.current.trim();
     const desc = descriptionRef.current.trim();
     if (!num || !d || !desc) {
-      setSessionNumber(entry.sessionNumber);
+      setMeetingNumber(entry.meetingNumber);
       setDateText(entry.dateText);
       setDescription(entry.description);
       return;
     }
     if (
-      num === entry.sessionNumber &&
+      num === entry.meetingNumber &&
       d === entry.dateText &&
       desc === entry.description
     )
       return;
     onUpdateEntry(entry.id, {
-      sessionNumber: num,
+      meetingNumber: num,
       dateText: d,
       description: desc,
     });
   }, [
-    entry.sessionNumber,
+    entry.meetingNumber,
     entry.dateText,
     entry.description,
     entry.id,
@@ -144,14 +144,14 @@ function SessionRow({
     onUpdateEntry,
   ]);
 
-  const sessionNoId = `session-no-${entry.id}`;
-  const dateId = `session-date-${entry.id}`;
-  const titleId = `session-title-${entry.id}`;
-  const descId = `session-desc-${entry.id}`;
+  const meetingNoId = `meeting-no-${entry.id}`;
+  const dateId = `meeting-date-${entry.id}`;
+  const titleId = `meeting-title-${entry.id}`;
+  const descId = `meeting-desc-${entry.id}`;
 
-  const displayedTitle = sessionTitleFromFields(
-    sessionTitlePattern,
-    sessionNumber,
+  const displayedTitle = meetingTitleFromFields(
+    meetingTitlePattern,
+    meetingNumber,
     dateText,
   );
 
@@ -177,17 +177,17 @@ function SessionRow({
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor={sessionNoId} className={fieldCaption}>
-              Session no.
+            <Label htmlFor={meetingNoId} className={fieldCaption}>
+              Meeting no.
             </Label>
             <Input
-              id={sessionNoId}
+              id={meetingNoId}
               className="font-mono tabular-nums"
               type="text"
               inputMode="numeric"
-              value={sessionNumber}
+              value={meetingNumber}
               onChange={(e) => {
-                setSessionNumber(e.target.value);
+                setMeetingNumber(e.target.value);
                 scheduleRestSave();
               }}
               onBlur={handleBlurRest}
@@ -289,16 +289,16 @@ function SessionRow({
   );
 }
 
-export function SessionsTable({
+export function MeetingsTable({
   entries,
-  sessionTitlePattern,
+  meetingTitlePattern,
   emptyMessage,
   onDelete,
   onUpdateEntry,
   excerptDownloadEnabled = false,
   excerptDownloadingId = null,
   onDownloadExcerpt,
-}: SessionsTableProps) {
+}: MeetingsTableProps) {
   if (entries.length === 0) {
     return (
       <div className="p-5 text-center text-sm text-muted-foreground">
@@ -313,10 +313,10 @@ export function SessionsTable({
       aria-label="Extracted documents"
     >
       {entries.map((entry) => (
-        <SessionRow
+        <MeetingRow
           key={entry.id}
           entry={entry}
-          sessionTitlePattern={sessionTitlePattern}
+          meetingTitlePattern={meetingTitlePattern}
           onDelete={onDelete}
           onUpdateEntry={onUpdateEntry}
           excerptDownloadEnabled={excerptDownloadEnabled}

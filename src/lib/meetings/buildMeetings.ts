@@ -1,45 +1,45 @@
-import type { SessionEntry, FlatTextItem } from "../../types/session";
+import type { MeetingEntry, FlatTextItem } from "../../types/meeting";
 import {
-  DEFAULT_SESSION_TITLE_PATTERN,
-  sessionTitleFromFields,
-} from "./sessionTitlePattern";
+  DEFAULT_MEETING_TITLE_PATTERN,
+  meetingTitleFromFields,
+} from "./meetingTitlePattern";
 import {
   SAME_LINE_TOL,
   needsSpaceBetween,
   isNoiseLine,
-  isSessionLine,
+  isMeetingLine,
   isFrenchDate,
   stripFrenchTimeFromDate,
   stripTrailingTocLeaders,
-  extractSessionNumber,
+  extractMeetingNumber,
 } from "./lineHeuristics";
 
-export function buildSessions(
+export function buildMeetings(
   pages: {
     page: number;
     items: FlatTextItem[];
   }[],
   symbolPrefix = "",
-  sessionTitlePattern = DEFAULT_SESSION_TITLE_PATTERN,
-): SessionEntry[] {
-  const sessions: SessionEntry[] = [];
+  meetingTitlePattern = DEFAULT_MEETING_TITLE_PATTERN,
+): MeetingEntry[] {
+  const meetings: MeetingEntry[] = [];
 
-  let currentSessionNumber: string | null = null;
+  let currentMeetingNumber: string | null = null;
   let currentDate: string | null = null;
   let currentPage = 0;
   let currentDescription: string[] = [];
 
   const flush = () => {
-    if (currentSessionNumber && currentDate) {
-      sessions.push({
-        id: `${currentPage}-${sessions.length}-${Date.now()}`,
+    if (currentMeetingNumber && currentDate) {
+      meetings.push({
+        id: `${currentPage}-${meetings.length}-${Date.now()}`,
         page: currentPage,
-        sessionNumber: currentSessionNumber,
-        symbol: symbolPrefix + currentSessionNumber,
+        meetingNumber: currentMeetingNumber,
+        symbol: symbolPrefix + currentMeetingNumber,
         dateText: currentDate,
-        sessionTitle: sessionTitleFromFields(
-          sessionTitlePattern,
-          currentSessionNumber,
+        meetingTitle: meetingTitleFromFields(
+          meetingTitlePattern,
+          currentMeetingNumber,
           currentDate,
         ),
         description: currentDescription
@@ -48,7 +48,7 @@ export function buildSessions(
           .trim(),
       });
     }
-    currentSessionNumber = null;
+    currentMeetingNumber = null;
     currentDate = null;
     currentDescription = [];
   };
@@ -86,12 +86,12 @@ export function buildSessions(
       const prevLine = filteredLines[i - 1]?.trim() ?? "";
 
       if (
-        isSessionLine(line) &&
+        isMeetingLine(line) &&
         (isFrenchDate(nextLine) || isFrenchDate(prevLine))
       ) {
         flush();
-        const n = extractSessionNumber(line);
-        currentSessionNumber = n.length > 0 ? n : line.trim();
+        const n = extractMeetingNumber(line);
+        currentMeetingNumber = n.length > 0 ? n : line.trim();
         const rawDate = isFrenchDate(nextLine) ? nextLine : prevLine;
         currentDate = stripFrenchTimeFromDate(rawDate);
         currentPage = page.page;
@@ -101,12 +101,12 @@ export function buildSessions(
         continue;
       }
 
-      if (currentSessionNumber && currentDate) {
+      if (currentMeetingNumber && currentDate) {
         currentDescription.push(stripTrailingTocLeaders(line));
       }
     }
   }
 
   flush();
-  return sessions;
+  return meetings;
 }

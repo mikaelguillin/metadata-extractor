@@ -1,6 +1,6 @@
 import { PDFDocument } from "pdf-lib";
 import * as pdfjsLib from "pdfjs-dist";
-import type { SessionEntry } from "../../types/session";
+import type { MeetingEntry } from "../../types/meeting";
 import { getPdfBlob } from "../storage/pdfBlobStore";
 import { findExcerptPageRangeForSymbol } from "./footerSymbol";
 
@@ -25,10 +25,10 @@ function excerptFilename(symbol: string): string {
  * Loads the book PDF from IndexedDB, finds excerpt page range via footer symbols,
  * builds a subset PDF with pdf-lib, and triggers a download.
  */
-export async function downloadSessionExcerptPdf(params: {
+export async function downloadMeetingExcerptPdf(params: {
   bookId: string;
   tocPageEnd: number;
-  entries: SessionEntry[];
+  entries: MeetingEntry[];
   entryId: string;
 }): Promise<void> {
   const { bookId, tocPageEnd, entries, entryId } = params;
@@ -49,14 +49,14 @@ export async function downloadSessionExcerptPdf(params: {
   const loadingTask = pdfjsLib.getDocument({ data: buffer.slice(0) });
   const doc = await loadingTask.promise;
 
-  const knownSessionSymbols = new Set(
+  const knownMeetingSymbols = new Set(
     entries.map((e) => e.symbol.trim()),
   );
   const range = await findExcerptPageRangeForSymbol(
     doc,
     tocPageEnd,
     entry.symbol,
-    knownSessionSymbols,
+    knownMeetingSymbols,
   );
   if (!range) {
     throw new Error(
@@ -73,7 +73,7 @@ export async function downloadSessionExcerptPdf(params: {
   const copied = await outPdf.copyPages(srcPdf, zeroBased);
   copied.forEach((page) => outPdf.addPage(page));
 
-  outPdf.setTitle(entry.sessionTitle);
+  outPdf.setTitle(entry.meetingTitle);
   outPdf.setAuthor("Nations Unies");
   outPdf.setSubject(entry.description);
   outPdf.setCustomMetadata("Language", "French");

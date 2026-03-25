@@ -20,8 +20,8 @@ type AppHeaderProps = {
   tocRangeHint: string | null;
   symbolPrefixInput: string;
   onSymbolPrefixChange: React.ChangeEventHandler<HTMLInputElement>;
-  sessionTitlePatternInput: string;
-  onSessionTitlePatternChange: React.ChangeEventHandler<HTMLTextAreaElement>;
+  meetingTitlePatternInput: string;
+  onMeetingTitlePatternChange: React.ChangeEventHandler<HTMLTextAreaElement>;
   onFileChange: React.ChangeEventHandler<HTMLInputElement>;
   onClearAll: () => void;
 };
@@ -38,8 +38,8 @@ export function AppHeader({
   tocRangeHint,
   symbolPrefixInput,
   onSymbolPrefixChange,
-  sessionTitlePatternInput,
-  onSessionTitlePatternChange,
+  meetingTitlePatternInput,
+  onMeetingTitlePatternChange,
   onFileChange,
   onClearAll,
 }: AppHeaderProps) {
@@ -169,20 +169,20 @@ export function AppHeader({
             </div>
             <div className="flex min-w-0 w-full flex-col gap-1">
               <Label
-                htmlFor="session-title-pattern"
+                htmlFor="meeting-title-pattern"
                 className="text-[0.68rem] font-medium tracking-wide text-muted-foreground uppercase"
               >
-                Modèle du titre de session
+                Modèle du titre de meeting
               </Label>
               <Textarea
-                id="session-title-pattern"
+                id="meeting-title-pattern"
                 className="min-h-[2.75rem] resize-y font-mono text-[0.8rem] leading-snug"
-                value={sessionTitlePatternInput}
-                onChange={onSessionTitlePatternChange}
+                value={meetingTitlePatternInput}
+                onChange={onMeetingTitlePatternChange}
                 rows={2}
                 spellCheck={false}
-                placeholder="General Assembly, nth session, official records, nth Committee, summary record of the {sessionNumber}th meeting, {sessionDate}, New York"
-                aria-label="Modèle du titre de session ({sessionNumber}, {sessionDate})"
+                placeholder="General Assembly, nth meeting, official records, nth Committee, summary record of the {meetingNumber}th meeting, {meetingDate}, New York"
+                aria-label="Modèle du titre de réunion ({meetingNumber}, {meetingDate})"
               />
             </div>
             {tocRangeHint && (

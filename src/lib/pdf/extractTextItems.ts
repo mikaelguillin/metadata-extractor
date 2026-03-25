@@ -3,8 +3,8 @@ import type {
   TextItem,
   TextMarkedContent,
 } from "pdfjs-dist/types/src/display/api";
-import type { FlatTextItem } from "../../types/session";
-import { compareReadingOrder } from "../sessions/lineHeuristics";
+import type { FlatTextItem } from "../../types/meeting";
+import { compareReadingOrder } from "../meetings/lineHeuristics";
 
 export type PageTextItems = {
   page: number;

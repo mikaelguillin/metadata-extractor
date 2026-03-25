@@ -1,4 +1,4 @@
-import type { FlatTextItem } from "../../types/session";
+import type { FlatTextItem } from "../../types/meeting";
 
 /** PDF user space: y increases upward, so larger y = higher on the page (read first). */
 export const SAME_LINE_TOL = 2.5;
@@ -33,13 +33,13 @@ export function isNoiseLine(text: string): boolean {
   return false;
 }
 
-export function isSessionLine(text: string): boolean {
+export function isMeetingLine(text: string): boolean {
   const compact = text.replace(/\s+/g, "").toLowerCase();
   return /^\d+$/.test(compact.substring(0, 2));
 }
 
-/** Leading session ordinal from a TOC line, e.g. "278ÈME SÉANCE" → "278". */
-export function extractSessionNumber(text: string): string {
+/** Leading meeting ordinal from a TOC line, e.g. "278ÈME SÉANCE" → "278". */
+export function extractMeetingNumber(text: string): string {
   const m = text.trim().match(/^(\d+)/);
   return m?.[1] ?? "";
 }

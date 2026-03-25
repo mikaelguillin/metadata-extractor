@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { extractSessionNumber } from "../lib/sessions/lineHeuristics";
 import {
-  DEFAULT_SESSION_TITLE_PATTERN,
-  effectiveSessionTitlePattern,
-  sessionTitleFromFields,
-} from "../lib/sessions/sessionTitlePattern";
+  DEFAULT_MEETING_TITLE_PATTERN,
+  effectiveMeetingTitlePattern,
+  meetingTitleFromFields,
+} from "../lib/meetings/meetingTitlePattern";
 import { deletePdfBlob } from "../lib/storage/pdfBlobStore";
 import type { Book } from "../types/book";
-import type { SessionEntry } from "../types/session";
+import type { MeetingEntry } from "../types/meeting";
 
 const STORAGE_KEY = "metadataExtractorBooks";
 
@@ -38,51 +37,38 @@ export function usePersistedBooks() {
       const symbolPrefixDefault = "";
       const books = parsed.books.map((b) => {
         const symbolPrefix = b.symbolPrefix ?? symbolPrefixDefault;
-        const sessionTitlePattern = effectiveSessionTitlePattern(
-          b.sessionTitlePattern ?? "",
+        const meetingTitlePattern = effectiveMeetingTitlePattern(
+          b.meetingTitlePattern ?? "",
         );
         return {
           ...b,
           symbolPrefix,
-          sessionTitlePattern,
+          meetingTitlePattern,
           pdfBlobKey: b.pdfBlobKey ?? null,
           tocPageStart: b.tocPageStart ?? null,
           tocPageEnd: b.tocPageEnd ?? null,
           entries: (b.entries ?? []).map((e) => {
-            const legacy = e as SessionEntry & {
-              sessionLabel?: string;
-              sessionTitleManual?: boolean;
-            };
-            const sessionNumber =
-              legacy.sessionNumber ??
-              (legacy.sessionLabel != null
-                ? extractSessionNumber(legacy.sessionLabel) ||
-                  String(legacy.sessionLabel).trim()
-                : "");
-            const {
-              sessionLabel: _omit,
-              symbol: _prevSym,
-              sessionTitle: _legacyTitle,
-              sessionTitleManual: _legacyManual,
-              ...rest
-            } = legacy;
-            const symbol =
-              legacy.symbol != null && String(legacy.symbol).trim() !== ""
-                ? String(legacy.symbol)
-                : symbolPrefix + sessionNumber;
+            const row = e as Partial<MeetingEntry>;
+            const meetingNumber = String(row.meetingNumber ?? "").trim();
             const dateText =
-              legacy.dateText != null ? String(legacy.dateText) : "";
-            const sessionTitle = sessionTitleFromFields(
-              sessionTitlePattern,
-              sessionNumber,
+              row.dateText != null ? String(row.dateText) : "";
+            const symbol =
+              row.symbol != null && String(row.symbol).trim() !== ""
+                ? String(row.symbol).trim()
+                : symbolPrefix + meetingNumber;
+            const meetingTitle = meetingTitleFromFields(
+              meetingTitlePattern,
+              meetingNumber,
               dateText,
             );
             return {
-              ...rest,
-              sessionNumber,
+              id: String(row.id ?? ""),
+              page: Number(row.page) || 0,
+              meetingNumber,
               symbol,
               dateText,
-              sessionTitle,
+              meetingTitle,
+              description: String(row.description ?? ""),
             };
           }),
         };
@@ -107,7 +93,7 @@ export function usePersistedBooks() {
         id,
         name,
         symbolPrefix: "",
-        sessionTitlePattern: DEFAULT_SESSION_TITLE_PATTERN,
+        meetingTitlePattern: DEFAULT_MEETING_TITLE_PATTERN,
         pdfFileName: null,
         pdfBlobKey: null,
         tocPageStart: null,
@@ -159,7 +145,7 @@ export function usePersistedBooks() {
           Book,
           | "name"
           | "symbolPrefix"
-          | "sessionTitlePattern"
+          | "meetingTitlePattern"
           | "pdfFileName"
           | "pdfBlobKey"
           | "entries"
