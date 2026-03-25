@@ -1,5 +1,5 @@
 /** Default when the book pattern is empty or missing. */
-export const DEFAULT_SESSION_TITLE_PATTERN = "{sessionNumber}-{sessionDate}";
+export const DEFAULT_SESSION_TITLE_PATTERN = "General Assembly, nth session, official records, nth Committee, summary record of the {sessionNumber}th meeting, {sessionDate}, New York";
 
 export function effectiveSessionTitlePattern(pattern: string): string {
   const t = pattern.trim();

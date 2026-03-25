@@ -179,7 +179,7 @@ export function AppHeader({
                 onChange={onSessionTitlePatternChange}
                 rows={2}
                 spellCheck={false}
-                placeholder="{sessionNumber}-{sessionDate}"
+                placeholder="General Assembly, nth session, official records, nth Committee, summary record of the {sessionNumber}th meeting, {sessionDate}, New York"
                 aria-label="Modèle du titre de session ({sessionNumber}, {sessionDate})"
               />
             </div>
