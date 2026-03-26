@@ -89,7 +89,7 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
     [bookId, tocStartInput, tocEndInput],
   );
 
-  const { loading, handleFileChange } = useBookPdfUpload({
+  const { loading, handlePdfFile, handleFileChange } = useBookPdfUpload({
     bookId,
     tocRange,
     symbolPrefixInput,
@@ -299,7 +299,6 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
       <AppHeader
         selectedBookName={book?.name ?? null}
         entryCount={entries.length}
-        loading={loading}
         uploadDisabled={uploadDisabled}
         tocStartInput={tocStartInput}
         tocEndInput={tocEndInput}
@@ -310,7 +309,6 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
         onSymbolPrefixChange={handleSymbolPrefixChange}
         meetingTitlePatternInput={meetingTitlePatternInput}
         onMeetingTitlePatternChange={handleMeetingTitlePatternChange}
-        onFileChange={handleFileChange}
         onClearAll={handleClearAll}
       />
 
@@ -321,6 +319,11 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
             meetingTitlePatternInput,
           )}
           emptyMessage={emptyTableMessage}
+          pdfDropZone={!!bookId && !book?.pdfFileName}
+          uploadDisabled={uploadDisabled}
+          pdfUploading={loading}
+          onPdfFile={handlePdfFile}
+          onPdfFileInputChange={handleFileChange}
           onDelete={handleDeleteEntry}
           onUpdateEntry={handleUpdateEntry}
           excerptDownloadEnabled={excerptDownloadEnabled}

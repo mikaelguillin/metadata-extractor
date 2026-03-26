@@ -1,5 +1,5 @@
 import type React from "react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,7 +11,6 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 type AppHeaderProps = {
   selectedBookName: string | null;
   entryCount: number;
-  loading: boolean;
   uploadDisabled: boolean;
   tocStartInput: string;
   tocEndInput: string;
@@ -22,14 +21,12 @@ type AppHeaderProps = {
   onSymbolPrefixChange: React.ChangeEventHandler<HTMLInputElement>;
   meetingTitlePatternInput: string;
   onMeetingTitlePatternChange: React.ChangeEventHandler<HTMLTextAreaElement>;
-  onFileChange: React.ChangeEventHandler<HTMLInputElement>;
   onClearAll: () => void;
 };
 
 export function AppHeader({
   selectedBookName,
   entryCount,
-  loading,
   uploadDisabled,
   tocStartInput,
   tocEndInput,
@@ -40,10 +37,8 @@ export function AppHeader({
   onSymbolPrefixChange,
   meetingTitlePatternInput,
   onMeetingTitlePatternChange,
-  onFileChange,
   onClearAll,
 }: AppHeaderProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [clearAllOpen, setClearAllOpen] = useState(false);
 
   return (
@@ -65,32 +60,6 @@ export function AppHeader({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
-          <input
-            ref={fileInputRef}
-            id="book-pdf-file"
-            type="file"
-            accept="application/pdf"
-            onChange={onFileChange}
-            disabled={uploadDisabled}
-            className="sr-only"
-            tabIndex={-1}
-            aria-label="Book PDF file"
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={uploadDisabled || loading}
-            className="inline-flex items-center gap-2 rounded-full border-dashed"
-            onClick={() => fileInputRef.current?.click()}
-            aria-disabled={uploadDisabled || loading}
-            aria-controls="book-pdf-file"
-          >
-            <span className="font-medium">Choose PDF</span>
-            <Badge variant="secondary" className="font-mono text-[0.72rem]">
-              pdfjs-dist
-            </Badge>
-          </Button>
           <Button
             type="button"
             variant="destructive"
