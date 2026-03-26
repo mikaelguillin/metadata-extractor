@@ -56,11 +56,11 @@ export function AppHeader({
           <div className="mt-1 text-[0.9rem] text-muted-foreground">
             {selectedBookName ? (
               <>
-                Livre sélectionné :{" "}
+                Selected book:{" "}
                 <strong className="text-foreground">{selectedBookName}</strong>
               </>
             ) : (
-              <>Sélectionnez un livre pour charger un PDF.</>
+              <>Select a book to load a PDF.</>
             )}
           </div>
         </div>
@@ -74,7 +74,7 @@ export function AppHeader({
             disabled={uploadDisabled}
             className="sr-only"
             tabIndex={-1}
-            aria-label="Fichier PDF du livre"
+            aria-label="Book PDF file"
           />
           <Button
             type="button"
@@ -86,7 +86,7 @@ export function AppHeader({
             aria-disabled={uploadDisabled || loading}
             aria-controls="book-pdf-file"
           >
-            <span className="font-medium">Choisir un PDF</span>
+            <span className="font-medium">Choose PDF</span>
             <Badge variant="secondary" className="font-mono text-[0.72rem]">
               pdfjs-dist
             </Badge>
@@ -105,7 +105,7 @@ export function AppHeader({
               className="size-1.5 shrink-0 rounded-full bg-green-500"
               aria-hidden
             />
-            <span>{entryCount} entrées</span>
+            <span>{entryCount} entries</span>
           </Badge>
         </div>
       </div>
@@ -116,7 +116,7 @@ export function AppHeader({
             <div className="flex flex-wrap items-end gap-2.5">
               <div className="flex flex-col gap-1">
                 <span className="text-[0.68rem] font-medium tracking-wide text-muted-foreground uppercase">
-                  Début TOC
+                  ToC start
                 </span>
                 <Input
                   type="number"
@@ -125,7 +125,7 @@ export function AppHeader({
                   step={1}
                   value={tocStartInput}
                   onChange={onTocStartChange}
-                  placeholder="ex. 5"
+                  placeholder="e.g. 5"
                   aria-invalid={!!tocRangeHint}
                 />
               </div>
@@ -134,7 +134,7 @@ export function AppHeader({
               </span>
               <div className="flex flex-col gap-1">
                 <span className="text-[0.68rem] font-medium tracking-wide text-muted-foreground uppercase">
-                  Fin TOC
+                  ToC end
                 </span>
                 <Input
                   type="number"
@@ -143,7 +143,7 @@ export function AppHeader({
                   step={1}
                   value={tocEndInput}
                   onChange={onTocEndChange}
-                  placeholder="ex. 12"
+                  placeholder="e.g. 12"
                   aria-invalid={!!tocRangeHint}
                 />
               </div>
@@ -153,7 +153,7 @@ export function AppHeader({
                 htmlFor="symbol-prefix"
                 className="text-[0.68rem] font-medium tracking-wide text-muted-foreground uppercase"
               >
-                Préfixe symbole
+                Symbol prefix
               </Label>
               <Input
                 id="symbol-prefix"
@@ -164,7 +164,7 @@ export function AppHeader({
                 placeholder="A/C.3/SR."
                 maxLength={80}
                 spellCheck={false}
-                aria-label="Préfixe symbole des documents"
+                aria-label="Document symbol prefix"
               />
             </div>
             <div className="flex min-w-0 w-full flex-col gap-1">
@@ -172,7 +172,7 @@ export function AppHeader({
                 htmlFor="meeting-title-pattern"
                 className="text-[0.68rem] font-medium tracking-wide text-muted-foreground uppercase"
               >
-                Modèle du titre de meeting
+                Meeting title template
               </Label>
               <Textarea
                 id="meeting-title-pattern"
@@ -182,7 +182,7 @@ export function AppHeader({
                 rows={2}
                 spellCheck={false}
                 placeholder="General Assembly, nth meeting, official records, nth Committee, summary record of the {meetingNumber}th meeting, {meetingDate}, New York"
-                aria-label="Modèle du titre de réunion ({meetingNumber}, {meetingDate})"
+                aria-label="Meeting title template ({meetingNumber}, {meetingDate})"
               />
             </div>
             {tocRangeHint && (
@@ -203,7 +203,7 @@ export function AppHeader({
         title="Clear all entries?"
         description={
           <>
-            All {entryCount} entrée{entryCount === 1 ? "" : "s"} for this book
+            All {entryCount} {entryCount === 1 ? "entry" : "entries"} for this book
             will be removed. This cannot be undone.
           </>
         }

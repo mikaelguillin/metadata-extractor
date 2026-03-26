@@ -51,7 +51,7 @@ export function useBookPdfUpload({
         if (!tocRange.ok) {
           appToastManager.add({
             type: "error",
-            description: "Plage de pages ToC invalide.",
+            description: "Invalid ToC page range.",
           });
           e.target.value = "";
           return;
@@ -59,7 +59,7 @@ export function useBookPdfUpload({
 
         const toastId = appToastManager.add({
           type: "loading",
-          description: `Chargement du PDF "${file.name}"…`,
+          description: `Loading PDF "${file.name}"…`,
           timeout: 0,
         });
         setLoading(true);
@@ -72,7 +72,7 @@ export function useBookPdfUpload({
           if (tocRange.end > doc.numPages) {
             appToastManager.update(toastId, {
               type: "error",
-              description: `La page fin (${tocRange.end}) dépasse le nombre de pages du PDF (${doc.numPages}).`,
+              description: `End page (${tocRange.end}) is past the PDF page count (${doc.numPages}).`,
               timeout: 7000,
             });
             return;
@@ -80,7 +80,7 @@ export function useBookPdfUpload({
 
           appToastManager.update(toastId, {
             type: "loading",
-            description: `PDF chargé (${doc.numPages} pages). Extraction du texte des pages ${tocRange.start}–${tocRange.end}…`,
+            description: `PDF loaded (${doc.numPages} pages). Extracting metadata from pages ${tocRange.start}–${tocRange.end}…`,
           });
 
           const pages = await extractTextItems(doc, {
@@ -89,7 +89,7 @@ export function useBookPdfUpload({
           });
           appToastManager.update(toastId, {
             type: "loading",
-            description: "Texte extrait. Construction des documents…",
+            description: "Metadata extracted. Building meeting documents…",
           });
 
           const meetings = buildMeetings(
@@ -116,14 +116,14 @@ export function useBookPdfUpload({
           });
           appToastManager.update(toastId, {
             type: "success",
-            description: `Terminé. ${meetings.length} document(s) détectée(s) (pages ToC ${tocRange.start}–${tocRange.end}).`,
+            description: `Done. ${meetings.length} document(s) detected (ToC pages ${tocRange.start}–${tocRange.end}).`,
             timeout: 5000,
           });
         } catch (err) {
           console.error(err);
           appToastManager.update(toastId, {
             type: "error",
-            description: "Erreur lors du traitement du PDF.",
+            description: "Error while processing the PDF.",
             timeout: 7000,
           });
         } finally {

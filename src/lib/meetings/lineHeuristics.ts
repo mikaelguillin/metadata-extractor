@@ -28,6 +28,7 @@ export function isNoiseLine(text: string): boolean {
   const trimmed = text.trim();
   if (!trimmed) return true;
   if (/^\d+$/.test(trimmed)) return true;
+  // French “table of contents” heading in source PDFs (must match document text).
   if (/^Table des matières$/i.test(trimmed)) return true;
   if (/^Pages?$/i.test(trimmed)) return true;
   return false;
@@ -38,7 +39,7 @@ export function isMeetingLine(text: string): boolean {
   return /^\d+$/.test(compact.substring(0, 2));
 }
 
-/** Leading meeting ordinal from a TOC line, e.g. "278ÈME SÉANCE" → "278". */
+/** Leading meeting ordinal from a TOC line (French UN-style wording), e.g. "278ÈME SÉANCE" → "278". */
 export function extractMeetingNumber(text: string): string {
   const m = text.trim().match(/^(\d+)/);
   return m?.[1] ?? "";
@@ -62,7 +63,7 @@ export function isFrenchDate(text: string): boolean {
   return hasMonth && hasYear;
 }
 
-/** Drop clock time after the date, e.g. ", à 11 h. 30" or " à 11 h. 30". */
+/** Strip trailing time-of-day from French-format dates (e.g. ", à 11 h. 30" or " à 11 h. 30"). */
 export function stripFrenchTimeFromDate(text: string): string {
   return text
     .replace(/,\s*à\s+.+$/iu, "")

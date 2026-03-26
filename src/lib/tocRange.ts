@@ -30,18 +30,18 @@ export function computeTocRangeHint(
   const tStart = tocStartInput.trim();
   const tEnd = tocEndInput.trim();
   if (tStart === "" && tEnd === "") {
-    return "Indiquez la première et la dernière page de la table des matières (indices du fichier PDF).";
+    return "Enter the first and last page of the table of contents (PDF file page indices).";
   }
   if (tStart === "" || tEnd === "") {
-    return "Les deux champs sont requis.";
+    return "Both fields are required.";
   }
   const start = parsePositiveInt(tocStartInput);
   const end = parsePositiveInt(tocEndInput);
   if (start === null || end === null) {
-    return "Entrez des nombres entiers ≥ 1.";
+    return "Enter whole numbers ≥ 1.";
   }
   if (start > end) {
-    return "La page de début doit être inférieure ou égale à la page de fin.";
+    return "The start page must be less than or equal to the end page.";
   }
   return null;
 }

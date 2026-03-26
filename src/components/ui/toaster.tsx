@@ -37,7 +37,7 @@ export function Toaster() {
               </Toast.Description>
               <Toast.Close
                 type="button"
-                aria-label="Fermer"
+                aria-label="Close"
                 className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 <X className="size-4" strokeWidth={2} />

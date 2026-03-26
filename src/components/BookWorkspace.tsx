@@ -229,7 +229,7 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
     if (!bookId) return;
     patchBook(bookId, { entries: [], pdfFileName: null });
     appToastManager.add({
-      description: "Toutes les entrées de ce livre ont été supprimées.",
+      description: "All entries for this book have been removed.",
     });
   };
 
@@ -244,14 +244,14 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
         appToastManager.add({
           type: "error",
           description:
-            "PDF du livre introuvable. Veuillez recharger le fichier PDF.",
+            "Book PDF not found. Please upload the PDF file again.",
         });
         return;
       }
       setExcerptDownloadingId(entryId);
       const toastId = appToastManager.add({
         type: "loading",
-        description: "Préparation de l’extrait PDF…",
+        description: "Preparing PDF excerpt…",
         timeout: 0,
       });
       try {
@@ -263,7 +263,7 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
         });
         appToastManager.update(toastId, {
           type: "success",
-          description: "Extrait PDF téléchargé.",
+          description: "PDF excerpt downloaded.",
           timeout: 5000,
         });
       } catch (err) {
@@ -273,7 +273,7 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
           description:
             err instanceof Error
               ? err.message
-              : "Erreur lors de la création de l’extrait PDF.",
+              : "Could not create the PDF for this meeting.",
           timeout: 7000,
         });
       } finally {
@@ -289,10 +289,10 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
     book.tocPageEnd != null &&
     entries.length > 0;
   const emptyTableMessage = !bookId
-    ? "Sélectionnez un livre dans la liste."
+    ? "Select a book from the list."
     : !book?.pdfFileName
-      ? "Indiquez la plage de pages de la table des matières, puis chargez le PDF du livre entier."
-      : "Aucun document détecté dans la plage ToC indiquée.";
+      ? "Set the table of contents page range, then upload the full book PDF."
+      : "No meetings detected in the given ToC page range.";
 
   return (
     <div className="min-w-0">

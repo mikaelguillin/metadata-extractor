@@ -36,13 +36,13 @@ export async function downloadMeetingExcerptPdf(params: {
   const buffer = await getPdfBlob(bookId);
   if (!buffer || buffer.byteLength === 0) {
     throw new Error(
-      "PDF du livre introuvable. Veuillez recharger le fichier PDF.",
+      "Book PDF not found. Please upload the PDF file again.",
     );
   }
 
   const entry = entries.find((e) => e.id === entryId);
   if (!entry) {
-    throw new Error("Entrée introuvable.");
+    throw new Error("Entry not found.");
   }
 
   // pdf.js may transfer/detach `data` to a worker; keep the original buffer for pdf-lib.
@@ -60,7 +60,7 @@ export async function downloadMeetingExcerptPdf(params: {
   );
   if (!range) {
     throw new Error(
-      `Symbole « ${entry.symbol.trim()} » introuvable dans le pied de page après la table des matières.`,
+      `Symbol “${entry.symbol.trim()}” not found in the footer after the table of contents.`,
     );
   }
 

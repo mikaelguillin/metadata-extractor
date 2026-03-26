@@ -91,30 +91,30 @@ export function BooksPanel({
       <Card size="sm" className="border-border/80 bg-muted/20">
         <CardHeader className="px-4 pt-4 pb-0">
           <CardTitle className="text-[0.78rem] font-semibold tracking-wide text-muted-foreground uppercase">
-            Livres
+            Books
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3 px-4 pb-4">
           <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
             <Label htmlFor="new-book-name" className="sr-only">
-              Nom du livre
+              Book name
             </Label>
             <Input
               id="new-book-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Nom du livre"
+              placeholder="Book name"
               maxLength={200}
-              aria-label="Nom du livre"
+              aria-label="Book name"
             />
             <Button type="submit" size="sm">
-              Créer
+              Create
             </Button>
           </form>
           {books.length === 0 ? (
             <p className="m-0 text-[0.8rem] text-muted-foreground leading-snug">
-              Créez un livre pour y associer un PDF.
+              Create a book to attach a PDF.
             </p>
           ) : (
             <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
@@ -133,7 +133,7 @@ export function BooksPanel({
                         onBlur={commitRename}
                         onKeyDown={handleRenameKeyDown}
                         maxLength={200}
-                        aria-label="Nouveau nom du livre"
+                        aria-label="New book name"
                       />
                     ) : (
                       <Button
@@ -148,7 +148,7 @@ export function BooksPanel({
                           <Badge
                             variant="outline"
                             className="shrink-0 border-emerald-500/35 bg-emerald-500/10 px-1.5 py-0 text-[0.65rem] text-emerald-300 font-mono"
-                            title={book.pdfFileName ?? "PDF enregistré"}
+                            title={book.pdfFileName ?? "Saved PDF"}
                           >
                             PDF
                           </Badge>
@@ -170,10 +170,10 @@ export function BooksPanel({
                       }}
                       aria-label={
                         isRenaming
-                          ? "Valider le nom"
-                          : `Renommer ${book.name}`
+                          ? "Save name"
+                          : `Rename ${book.name}`
                       }
-                      title={isRenaming ? "Valider" : "Renommer"}
+                      title={isRenaming ? "Save" : "Rename"}
                     >
                       ✎
                     </Button>
@@ -187,7 +187,7 @@ export function BooksPanel({
                         setBookDeleteDialogOpen(true);
                       }}
                       disabled={isRenaming}
-                      aria-label={`Supprimer ${book.name}`}
+                      aria-label={`Delete ${book.name}`}
                     >
                       ×
                     </Button>
@@ -204,17 +204,17 @@ export function BooksPanel({
         onOpenChangeComplete={(opened) => {
           if (!opened) setBookToDelete(null);
         }}
-        title="Supprimer ce livre ?"
+        title="Delete this book?"
         description={
           bookToDelete ? (
             <>
-              « {bookToDelete.name} » et ses données locales seront supprimés.
-              Cette action est irréversible.
+              “{bookToDelete.name}” and its local data will be removed. This
+              cannot be undone.
             </>
           ) : null
         }
-        cancelLabel="Annuler"
-        confirmLabel="Supprimer"
+        cancelLabel="Cancel"
+        confirmLabel="Delete"
         onConfirm={() => {
           if (bookToDelete) onDelete(bookToDelete.id);
         }}

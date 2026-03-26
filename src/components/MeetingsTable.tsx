@@ -168,7 +168,7 @@ function MeetingRow({
       >
         <CardContent className="flex min-w-0 flex-1 flex-col gap-3 py-4">
           <div className="border-border border-b pb-2">
-            <div className={fieldCaption}>Symbole</div>
+            <div className={fieldCaption}>Symbol</div>
             <div
               className="mt-1 break-all font-mono text-[0.95rem] font-semibold tracking-wide text-indigo-100"
               title={entry.symbol}
@@ -250,8 +250,8 @@ function MeetingRow({
               disabled={!excerptDownloadEnabled || excerptDownloading}
               title={
                 excerptDownloadEnabled
-                  ? "Télécharger l’extrait PDF (pied de page)"
-                  : "Enregistrez d’abord le PDF du livre (extrait ToC)."
+                  ? "Download PDF"
+                  : "Save the book PDF (ToC excerpt) first."
               }
               onClick={() => onDownloadExcerpt(entry.id)}
             >
