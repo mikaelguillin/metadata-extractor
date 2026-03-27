@@ -74,7 +74,7 @@ export function AppHeader({
               className="size-1.5 shrink-0 rounded-full bg-green-500"
               aria-hidden
             />
-            <span>{entryCount} entries</span>
+            <span>{entryCount} meetings</span>
           </Badge>
         </div>
       </div>

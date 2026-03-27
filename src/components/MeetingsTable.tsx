@@ -283,10 +283,10 @@ function MeetingRow({
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        title="Delete this entry?"
+        title="Delete this meeting?"
         description={
           <>
-            This removes the row for symbol{" "}
+            This removes the meeting{" "}
             <span className="font-mono text-foreground">{entry.symbol}</span>.
             This cannot be undone.
           </>
