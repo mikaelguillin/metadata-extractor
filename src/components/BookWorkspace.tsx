@@ -5,6 +5,10 @@ import { MeetingsTable } from "./MeetingsTable";
 import { useBookPdfUpload } from "../hooks/useBookPdfUpload";
 import { downloadMeetingExcerptPdf } from "../lib/pdf/downloadMeetingExcerpt";
 import {
+  createAdjacentMeetingEntry,
+  type AdjacentPlacement,
+} from "../lib/meetings/adjacentMeeting";
+import {
   effectiveMeetingTitlePattern,
   meetingTitleFromFields,
 } from "../lib/meetings/meetingTitlePattern";
@@ -188,6 +192,29 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
     });
   };
 
+  const handleAddMeetingAdjacent = (
+    anchorId: string,
+    placement: AdjacentPlacement,
+  ) => {
+    if (!bookId || !book) return;
+    const idx = book.entries.findIndex((e) => e.id === anchorId);
+    if (idx === -1) return;
+    const anchor = book.entries[idx];
+    const insertIndex = placement === "before" ? idx : idx + 1;
+    const newEntry = createAdjacentMeetingEntry(
+      anchor,
+      placement,
+      symbolPrefixInput,
+      book.meetingTitlePattern,
+    );
+    const next = [
+      ...book.entries.slice(0, insertIndex),
+      newEntry,
+      ...book.entries.slice(insertIndex),
+    ];
+    patchBook(bookId, { entries: next });
+  };
+
   const handleUpdateEntry = (
     id: string,
     updates: Partial<
@@ -325,6 +352,7 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
           onPdfFile={handlePdfFile}
           onPdfFileInputChange={handleFileChange}
           onDelete={handleDeleteEntry}
+          onAddMeetingAdjacent={handleAddMeetingAdjacent}
           onUpdateEntry={handleUpdateEntry}
           excerptDownloadEnabled={excerptDownloadEnabled}
           excerptDownloadingId={excerptDownloadingId}

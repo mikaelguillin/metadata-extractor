@@ -6,6 +6,7 @@ import {
   useState,
 } from "react";
 import { FileText } from "lucide-react";
+import type { AdjacentPlacement } from "../lib/meetings/adjacentMeeting";
 import { meetingTitleFromFields } from "../lib/meetings/meetingTitlePattern";
 import type { MeetingEntry } from "../types/meeting";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,10 @@ type MeetingsTableProps = {
   onPdfFile?: (file: File) => void | Promise<void>;
   onPdfFileInputChange?: React.ChangeEventHandler<HTMLInputElement>;
   onDelete: (id: string) => void;
+  onAddMeetingAdjacent: (
+    anchorId: string,
+    placement: AdjacentPlacement,
+  ) => void;
   onUpdateEntry: (
     id: string,
     updates: Partial<
@@ -47,6 +52,7 @@ function MeetingRow({
   entry,
   meetingTitlePattern,
   onDelete,
+  onAddMeetingAdjacent,
   onUpdateEntry,
   excerptDownloadEnabled,
   excerptDownloading,
@@ -55,6 +61,7 @@ function MeetingRow({
   entry: MeetingEntry;
   meetingTitlePattern: string;
   onDelete: (id: string) => void;
+  onAddMeetingAdjacent: MeetingsTableProps["onAddMeetingAdjacent"];
   onUpdateEntry: MeetingsTableProps["onUpdateEntry"];
   excerptDownloadEnabled: boolean;
   excerptDownloading: boolean;
@@ -127,12 +134,9 @@ function MeetingRow({
     const num = meetingNumberRef.current.trim();
     const d = dateRef.current.trim();
     const desc = descriptionRef.current.trim();
-    if (!num || !d || !desc) {
-      setMeetingNumber(entry.meetingNumber);
-      setDateText(entry.dateText);
-      setDescription(entry.description);
-      return;
-    }
+    // Incomplete rows: keep local state. Resetting from `entry` would wipe
+    // in-progress typing (new meetings stay empty in the parent until all fields are set).
+    if (!num || !d || !desc) return;
     if (
       num === entry.meetingNumber &&
       d === entry.dateText &&
@@ -267,6 +271,22 @@ function MeetingRow({
               {excerptDownloading ? "…" : "Download PDF"}
             </Button>
           )}
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => onAddMeetingAdjacent(entry.id, "before")}
+          >
+            Add meeting above
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => onAddMeetingAdjacent(entry.id, "after")}
+          >
+            Add meeting below
+          </Button>
           <Button
             type="button"
             variant="destructive"
@@ -430,6 +450,7 @@ export function MeetingsTable({
   onPdfFile,
   onPdfFileInputChange,
   onDelete,
+  onAddMeetingAdjacent,
   onUpdateEntry,
   excerptDownloadEnabled = false,
   excerptDownloadingId = null,
@@ -469,6 +490,7 @@ export function MeetingsTable({
           entry={entry}
           meetingTitlePattern={meetingTitlePattern}
           onDelete={onDelete}
+          onAddMeetingAdjacent={onAddMeetingAdjacent}
           onUpdateEntry={onUpdateEntry}
           excerptDownloadEnabled={excerptDownloadEnabled}
           excerptDownloading={excerptDownloadingId === entry.id}

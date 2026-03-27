@@ -45,6 +45,41 @@ export function extractMeetingNumber(text: string): string {
   return m?.[1] ?? "";
 }
 
+/**
+ * Increments the leading digit run (e.g. "346" → "347", "009" → "010").
+ * Preserves any non-digit suffix. If there is no leading digit run, appends "-1".
+ */
+export function incrementMeetingNumber(current: string): string {
+  const t = current.trim();
+  const m = t.match(/^(\d+)(.*)$/);
+  if (!m) return t === "" ? "1" : `${t}-1`;
+  const digits = m[1];
+  const rest = m[2] ?? "";
+  const n = parseInt(digits, 10);
+  if (!Number.isFinite(n)) return `${t}-1`;
+  const next = n + 1;
+  const minWidth = Math.max(digits.length, String(next).length);
+  return String(next).padStart(minWidth, "0") + rest;
+}
+
+/**
+ * Decrements the leading digit run (e.g. "347" → "346", "010" → "009").
+ * Preserves any non-digit suffix. If the value is already ≤ 0, returns `"0"` plus suffix.
+ */
+export function decrementMeetingNumber(current: string): string {
+  const t = current.trim();
+  const m = t.match(/^(\d+)(.*)$/);
+  if (!m) return t === "" ? "0" : `${t}-0`;
+  const digits = m[1];
+  const rest = m[2] ?? "";
+  const n = parseInt(digits, 10);
+  if (!Number.isFinite(n)) return `${t}-0`;
+  if (n <= 0) return `0${rest}`;
+  const next = n - 1;
+  const minWidth = Math.max(digits.length, String(next).length);
+  return String(next).padStart(minWidth, "0") + rest;
+}
+
 /** Strip TOC-style leaders from the end of a line (4+ dots then any trailing tail). */
 export function stripTrailingTocLeaders(text: string): string {
   return text.replace(/(\.\s | \.){4,}.*$/, "").trimEnd();
