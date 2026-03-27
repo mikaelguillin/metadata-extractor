@@ -1,5 +1,6 @@
 import type React from "react";
 import { useState } from "react";
+import { Moon, Sun } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useTheme } from "@/hooks/useTheme";
 
 type AppHeaderProps = {
   selectedBookName: string | null;
@@ -40,6 +42,7 @@ export function AppHeader({
   onClearAll,
 }: AppHeaderProps) {
   const [clearAllOpen, setClearAllOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <>
@@ -60,6 +63,24 @@ export function AppHeader({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon-sm"
+            onClick={toggleTheme}
+            aria-label={
+              theme === "dark"
+                ? "Switch to light theme"
+                : "Switch to dark theme"
+            }
+            title={theme === "dark" ? "Light theme" : "Dark theme"}
+          >
+            {theme === "dark" ? (
+              <Sun className="size-4" aria-hidden />
+            ) : (
+              <Moon className="size-4" aria-hidden />
+            )}
+          </Button>
           <Button
             type="button"
             variant="destructive"

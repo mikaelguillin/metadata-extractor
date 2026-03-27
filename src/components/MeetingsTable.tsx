@@ -179,7 +179,7 @@ function MeetingRow({
           <div className="border-border border-b pb-2">
             <div className={fieldCaption}>Symbol</div>
             <div
-              className="mt-1 break-all font-mono text-[0.95rem] font-semibold tracking-wide text-indigo-100"
+              className="mt-1 break-all font-mono text-[0.95rem] font-semibold tracking-wide text-indigo-700 dark:text-indigo-100"
               title={entry.symbol}
             >
               {entry.symbol}
