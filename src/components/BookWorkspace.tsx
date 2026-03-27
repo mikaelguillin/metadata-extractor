@@ -18,7 +18,6 @@ import {
 } from "../lib/tocRange";
 import type { Book } from "../types/book";
 import type { MeetingEntry } from "../types/meeting";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { appToastManager } from "@/lib/appToast";
 
 type PatchBook = (
@@ -339,26 +338,24 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
         onClearAll={handleClearAll}
       />
 
-      <ScrollArea className="h-[65vh] rounded-xl border border-border bg-card ring-1 ring-foreground/10">
-        <MeetingsTable
-          entries={entries}
-          meetingTitlePattern={effectiveMeetingTitlePattern(
-            meetingTitlePatternInput,
-          )}
-          emptyMessage={emptyTableMessage}
-          pdfDropZone={!!bookId && !book?.pdfFileName}
-          uploadDisabled={uploadDisabled}
-          pdfUploading={loading}
-          onPdfFile={handlePdfFile}
-          onPdfFileInputChange={handleFileChange}
-          onDelete={handleDeleteEntry}
-          onAddMeetingAdjacent={handleAddMeetingAdjacent}
-          onUpdateEntry={handleUpdateEntry}
-          excerptDownloadEnabled={excerptDownloadEnabled}
-          excerptDownloadingId={excerptDownloadingId}
-          onDownloadExcerpt={handleDownloadExcerpt}
-        />
-      </ScrollArea>
+      <MeetingsTable
+        entries={entries}
+        meetingTitlePattern={effectiveMeetingTitlePattern(
+          meetingTitlePatternInput,
+        )}
+        emptyMessage={emptyTableMessage}
+        pdfDropZone={!!bookId && !book?.pdfFileName}
+        uploadDisabled={uploadDisabled}
+        pdfUploading={loading}
+        onPdfFile={handlePdfFile}
+        onPdfFileInputChange={handleFileChange}
+        onDelete={handleDeleteEntry}
+        onAddMeetingAdjacent={handleAddMeetingAdjacent}
+        onUpdateEntry={handleUpdateEntry}
+        excerptDownloadEnabled={excerptDownloadEnabled}
+        excerptDownloadingId={excerptDownloadingId}
+        onDownloadExcerpt={handleDownloadExcerpt}
+      />
     </div>
   );
 }

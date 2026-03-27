@@ -481,7 +481,7 @@ export function MeetingsTable({
 
   return (
     <ul
-      className="m-0 flex list-none flex-col gap-3 p-3"
+      className="m-0 flex list-none flex-col gap-3"
       aria-label="Extracted documents"
     >
       {entries.map((entry) => (
