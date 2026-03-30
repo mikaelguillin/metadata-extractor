@@ -2,7 +2,10 @@ import { PDFDocument } from "pdf-lib";
 import * as pdfjsLib from "pdfjs-dist";
 import type { MeetingEntry } from "../../types/meeting";
 import { getPdfBlob } from "../storage/pdfBlobStore";
-import { findExcerptPageRangeForSymbol } from "./footerSymbol";
+import {
+  findExcerptPageRangeForSymbol,
+  normalizeFooterSymbolForMatch,
+} from "./footerSymbol";
 
 function triggerDownload(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
@@ -50,7 +53,7 @@ export async function downloadMeetingExcerptPdf(params: {
   const doc = await loadingTask.promise;
 
   const knownMeetingSymbols = new Set(
-    entries.map((e) => e.symbol.trim()),
+    entries.map((e) => normalizeFooterSymbolForMatch(e.symbol)),
   );
   const range = await findExcerptPageRangeForSymbol(
     doc,

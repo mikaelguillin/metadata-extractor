@@ -3,6 +3,14 @@ import type { FlatTextItem } from "../../types/meeting";
 import { compareReadingOrder, needsSpaceBetween } from "../meetings/lineHeuristics";
 import { extractRawTextItemsForPage } from "./extractTextItems";
 
+/**
+ * Trims and removes all whitespace inside the string so footer text (PDF runs + inserted
+ * spaces) matches stored meeting symbols regardless of spacing.
+ */
+export function normalizeFooterSymbolForMatch(s: string): string {
+  return s.trim().replace(/\s+/g, "");
+}
+
 /** Left boundary: pt from the left; region extends to `pageWidth`. PDF user space. */
 const FOOTER_X_FROM_LEFT_PT = 470;
 /** Top boundary of the region is `pageHeight -` this (pt down from the page top). */
@@ -66,8 +74,9 @@ export type ExcerptPageRange = { start: number; end: number };
  * Finds the page range for one meeting: first footer match for `symbol` after the ToC,
  * through the last page before a different known meeting symbol appears in the footer.
  *
- * Intermediate pages may have empty footers or non-symbol text; only footers that equal
- * another entry in `knownMeetingSymbols` (other than `symbol`) end the range.
+ * Intermediate pages may have empty footers or non-symbol text; only footers that match
+ * another entry in `knownMeetingSymbols` (other than `symbol`) after
+ * {@link normalizeFooterSymbolForMatch} end the range.
  *
  * This does not depend on table row order. ToC order can differ from body order without
  * mixing up excerpts.
@@ -78,13 +87,13 @@ export async function findExcerptPageRangeForSymbol(
   symbol: string,
   knownMeetingSymbols: Set<string>,
 ): Promise<ExcerptPageRange | null> {
-  const sym = symbol.trim();
+  const sym = normalizeFooterSymbolForMatch(symbol);
   const numPages = doc.numPages;
   let start: number | null = null;
 
   for (let p = tocPageEnd + 1; p <= numPages; p++) {
     const line = await readFooterLine(doc, p);
-    if (line === sym) {
+    if (normalizeFooterSymbolForMatch(line) === sym) {
       start = p;
       break;
     }
@@ -94,11 +103,11 @@ export async function findExcerptPageRangeForSymbol(
 
   let end = start;
   for (let p = start + 1; p <= numPages; p++) {
-    const line = (await readFooterLine(doc, p)).trim();
+    const lineNorm = normalizeFooterSymbolForMatch(await readFooterLine(doc, p));
     if (
-      line !== "" &&
-      knownMeetingSymbols.has(line) &&
-      line !== sym
+      lineNorm !== "" &&
+      knownMeetingSymbols.has(lineNorm) &&
+      lineNorm !== sym
     ) {
       break;
     }
