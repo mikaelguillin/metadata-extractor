@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { CopyButton } from "@/components/ui/copy-button";
 
 const SAVE_DEBOUNCE_MS = 400;
 
@@ -225,9 +226,16 @@ function MeetingRow({
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor={titleId} className={fieldCaption}>
-              Title
-            </Label>
+            <div className="flex items-center justify-between gap-2">
+              <Label htmlFor={titleId} className={fieldCaption}>
+                Title
+              </Label>
+              <CopyButton
+                text={displayedTitle}
+                title="Copy title"
+                aria-label="Copy title"
+              />
+            </div>
             <Input
               id={titleId}
               readOnly
@@ -237,9 +245,16 @@ function MeetingRow({
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor={descId} className={fieldCaption}>
-              Description
-            </Label>
+            <div className="flex items-center justify-between gap-2">
+              <Label htmlFor={descId} className={fieldCaption}>
+                Description
+              </Label>
+              <CopyButton
+                text={description}
+                title="Copy description"
+                aria-label="Copy description"
+              />
+            </div>
             <Textarea
               id={descId}
               className="min-h-[5.5rem] resize-y leading-snug whitespace-pre-wrap"
