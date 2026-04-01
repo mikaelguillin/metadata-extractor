@@ -105,9 +105,9 @@ function MeetingRow({
     flushRestDebounced();
     restDebounceRef.current = setTimeout(() => {
       restDebounceRef.current = null;
-      const num = meetingNumberRef.current.trim();
-      const d = dateRef.current.trim();
-      const desc = descriptionRef.current.trim();
+      const num = meetingNumberRef.current;
+      const d = dateRef.current;
+      const desc = descriptionRef.current;
       if (!num || !d || !desc) return;
       if (
         num === entry.meetingNumber &&
@@ -132,9 +132,9 @@ function MeetingRow({
 
   const handleBlurRest = useCallback(() => {
     flushRestDebounced();
-    const num = meetingNumberRef.current.trim();
-    const d = dateRef.current.trim();
-    const desc = descriptionRef.current.trim();
+    const num = meetingNumberRef.current;
+    const d = dateRef.current;
+    const desc = descriptionRef.current;
     // Incomplete rows: keep local state. Resetting from `entry` would wipe
     // in-progress typing (new meetings stay empty in the parent until all fields are set).
     if (!num || !d || !desc) return;
