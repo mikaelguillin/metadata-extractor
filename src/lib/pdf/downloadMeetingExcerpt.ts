@@ -79,7 +79,7 @@ export async function downloadMeetingExcerptPdf(params: {
   outPdf.setTitle(entry.meetingTitle);
   outPdf.setAuthor("Nations Unies");
   outPdf.setSubject(entry.description);
-  outPdf.setProducer("Nations Unies");
+  outPdf.setProducer("pdf-lib");
   outPdf.setCustomMetadata("Language", "French");
   outPdf.setCustomMetadata("Symbol", entry.symbol);
 
