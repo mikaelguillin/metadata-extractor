@@ -1,7 +1,7 @@
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppHeader } from "./AppHeader";
-import { MeetingsTable } from "./MeetingsTable";
+import { MeetingsTable } from "@/components/meetings/MeetingsTable";
 import { useBookPdfUpload } from "../hooks/useBookPdfUpload";
 import { downloadMeetingExcerptPdf } from "../lib/pdf/downloadMeetingExcerpt";
 import {
