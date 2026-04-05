@@ -48,7 +48,7 @@ export function AppHeader({
     <>
       <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <div className="font-heading text-[1.4rem] font-semibold tracking-wide">
+          <div className="font-heading text-[1.4rem] font-semibold tracking-wide text-primary">
             Metadata extractor
           </div>
           <div className="mt-1 text-[0.9rem] text-muted-foreground">
