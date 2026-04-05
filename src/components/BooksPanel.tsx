@@ -144,15 +144,6 @@ export function BooksPanel({
                         onClick={() => onSelect(book.id)}
                       >
                         <span className="truncate">{book.name}</span>
-                        {(book.pdfBlobKey || book.pdfFileName) && (
-                          <Badge
-                            variant="outline"
-                            className="shrink-0 border-emerald-600/30 bg-emerald-600/10 px-1.5 py-0 text-[0.65rem] text-emerald-800 dark:border-emerald-500/35 dark:bg-emerald-500/10 dark:text-emerald-300 font-mono"
-                            title={book.pdfFileName ?? "Saved PDF"}
-                          >
-                            PDF
-                          </Badge>
-                        )}
                       </Button>
                     )}
                     <Button
