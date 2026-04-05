@@ -339,6 +339,7 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
       />
 
       <MeetingsTable
+        key={bookId ?? "no-book"}
         entries={entries}
         meetingTitlePattern={effectiveMeetingTitlePattern(
           meetingTitlePatternInput,
