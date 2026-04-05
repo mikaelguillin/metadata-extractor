@@ -47,13 +47,10 @@ export function MeetingsTable({
   excerptDownloadingId = null,
   onDownloadExcerpt,
 }: MeetingsTableProps) {
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(
-    () => new Set(),
-  );
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
 
   const allCollapsed =
-    entries.length > 0 &&
-    entries.every((e) => !expandedIds.has(e.id));
+    entries.length > 0 && entries.every((e) => !expandedIds.has(e.id));
 
   const expandAll = useCallback(() => {
     setExpandedIds(new Set(entries.map((e) => e.id)));
@@ -64,11 +61,7 @@ export function MeetingsTable({
   }, []);
 
   if (entries.length === 0) {
-    if (
-      pdfDropZone &&
-      onPdfFile &&
-      onPdfFileInputChange
-    ) {
+    if (pdfDropZone && onPdfFile && onPdfFileInputChange) {
       return (
         <PdfUploadDropZone
           message={emptyMessage}
