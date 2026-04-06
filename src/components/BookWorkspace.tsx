@@ -9,6 +9,7 @@ import {
   type AdjacentPlacement,
 } from "../lib/meetings/adjacentMeeting";
 import {
+  DEFAULT_SYMBOL_PREFIX,
   effectiveMeetingTitlePattern,
   meetingTitleFromFields,
 } from "../lib/meetings/meetingTitlePattern";
@@ -58,7 +59,7 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
   const [tocStartInput, setTocStartInput] = useState(() => initialTocStart(book));
   const [tocEndInput, setTocEndInput] = useState(() => initialTocEnd(book));
   const [symbolPrefixInput, setSymbolPrefixInput] = useState(
-    () => book?.symbolPrefix ?? "",
+    () => book?.symbolPrefix ?? DEFAULT_SYMBOL_PREFIX,
   );
   const [meetingTitlePatternInput, setMeetingTitlePatternInput] = useState(
     () => book?.meetingTitlePattern ?? "",

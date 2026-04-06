@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   DEFAULT_MEETING_TITLE_PATTERN,
+  DEFAULT_SYMBOL_PREFIX,
   effectiveMeetingTitlePattern,
   meetingTitleFromFields,
 } from "../lib/meetings/meetingTitlePattern";
@@ -34,7 +35,7 @@ export function usePersistedBooks() {
       ) {
         selectedBookId = parsed.books[0]?.id ?? null;
       }
-      const symbolPrefixDefault = "";
+      const symbolPrefixDefault = DEFAULT_SYMBOL_PREFIX;
       const books = parsed.books.map((b) => {
         const symbolPrefix = b.symbolPrefix ?? symbolPrefixDefault;
         const meetingTitlePattern = effectiveMeetingTitlePattern(
@@ -92,7 +93,7 @@ export function usePersistedBooks() {
       const book: Book = {
         id,
         name,
-        symbolPrefix: "",
+        symbolPrefix: DEFAULT_SYMBOL_PREFIX,
         meetingTitlePattern: DEFAULT_MEETING_TITLE_PATTERN,
         pdfFileName: null,
         pdfBlobKey: null,

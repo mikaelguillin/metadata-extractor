@@ -1,3 +1,6 @@
+/** Default document symbol prefix for new books (UN-style; edit per committee/session). */
+export const DEFAULT_SYMBOL_PREFIX = "A/C.N/SR.";
+
 /** Default when the book pattern is empty or missing. */
 export const DEFAULT_MEETING_TITLE_PATTERN =
   "General Assembly, nth meeting, official records, nth Committee, summary record of the {meetingNumber}th meeting, {meetingDate}, New York";
