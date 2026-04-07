@@ -39,7 +39,7 @@ export function PdfUploadDropZone({
   );
 
   return (
-    <div className="p-5 sm:p-8">
+    <div className="py-5 sm:py-8">
       <div
         className={cn(
           "relative flex min-h-[min(22rem,50vh)] flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-10 text-center transition-[border-color,background-color,box-shadow] duration-150",

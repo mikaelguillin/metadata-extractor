@@ -1,7 +1,6 @@
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import type { Book } from "../types/book";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -112,6 +111,11 @@ export function BooksPanel({
               Create
             </Button>
           </form>
+          <div
+            role="separator"
+            aria-orientation="horizontal"
+            className="h-px w-full shrink-0 bg-border"
+          />
           {books.length === 0 ? (
             <p className="m-0 text-[0.8rem] text-muted-foreground leading-snug">
               Create a book to attach a PDF.
