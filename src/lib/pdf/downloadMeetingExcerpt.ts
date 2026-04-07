@@ -1,5 +1,6 @@
 import { PDFDocument } from "pdf-lib";
 import * as pdfjsLib from "pdfjs-dist";
+import type { BookLanguage } from "../../types/book";
 import type { MeetingEntry } from "../../types/meeting";
 import { getPdfBlob } from "../storage/pdfBlobStore";
 import {
@@ -19,9 +20,10 @@ function triggerDownload(blob: Blob, filename: string): void {
   URL.revokeObjectURL(url);
 }
 
-function excerptFilename(symbol: string): string {
+function excerptFilename(symbol: string, language: BookLanguage): string {
+  const suffix = language === "en" ? "E" : "F";
   const safe = symbol.trim().replace(/\//g, "_");
-  return `${safe}-F.pdf`;
+  return `${safe}-${suffix}.pdf`;
 }
 
 /**
@@ -33,8 +35,9 @@ export async function downloadMeetingExcerptPdf(params: {
   tocPageEnd: number;
   entries: MeetingEntry[];
   entryId: string;
+  language: BookLanguage;
 }): Promise<void> {
-  const { bookId, tocPageEnd, entries, entryId } = params;
+  const { bookId, tocPageEnd, entries, entryId, language } = params;
 
   const buffer = await getPdfBlob(bookId);
   if (!buffer || buffer.byteLength === 0) {
@@ -77,13 +80,18 @@ export async function downloadMeetingExcerptPdf(params: {
   copied.forEach((page) => outPdf.addPage(page));
 
   outPdf.setTitle(entry.meetingTitle);
-  outPdf.setAuthor("Nations Unies");
+  outPdf.setAuthor(
+    language === "en" ? "United Nations" : "Nations Unies",
+  );
   outPdf.setSubject(entry.description);
   outPdf.setProducer("pdf-lib");
-  outPdf.setCustomMetadata("Language", "French");
+  outPdf.setCustomMetadata(
+    "Language",
+    language === "en" ? "English" : "French",
+  );
   outPdf.setCustomMetadata("Symbol", entry.symbol);
 
   const bytes = await outPdf.save();
   const blob = new Blob([new Uint8Array(bytes)], { type: "application/pdf" });
-  triggerDownload(blob, excerptFilename(entry.symbol));
+  triggerDownload(blob, excerptFilename(entry.symbol, language));
 }

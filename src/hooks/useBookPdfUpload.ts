@@ -7,7 +7,7 @@ import { effectiveMeetingTitlePattern } from "../lib/meetings/meetingTitlePatter
 import type { TocRangeResult } from "../lib/tocRange";
 import { appToastManager } from "../lib/appToast";
 import { savePdfBlob } from "../lib/storage/pdfBlobStore";
-import type { Book } from "../types/book";
+import type { Book, BookLanguage } from "../types/book";
 
 type PatchBook = (
   id: string,
@@ -30,6 +30,7 @@ type UseBookPdfUploadArgs = {
   tocRange: TocRangeResult;
   symbolPrefixInput: string;
   meetingTitlePatternInput: string;
+  bookLanguage: BookLanguage;
   patchBook: PatchBook;
 };
 
@@ -38,6 +39,7 @@ export function useBookPdfUpload({
   tocRange,
   symbolPrefixInput,
   meetingTitlePatternInput,
+  bookLanguage,
   patchBook,
 }: UseBookPdfUploadArgs) {
   const [loading, setLoading] = useState(false);
@@ -95,7 +97,11 @@ export function useBookPdfUpload({
             items: p.items,
           })),
           symbolPrefixInput,
-          effectiveMeetingTitlePattern(meetingTitlePatternInput),
+          effectiveMeetingTitlePattern(
+            meetingTitlePatternInput,
+            bookLanguage,
+          ),
+          bookLanguage,
         );
 
         await savePdfBlob(bookId, arrayBuffer);
@@ -108,6 +114,7 @@ export function useBookPdfUpload({
           symbolPrefix: symbolPrefixInput,
           meetingTitlePattern: effectiveMeetingTitlePattern(
             meetingTitlePatternInput,
+            bookLanguage,
           ),
           entries: meetings,
         });
@@ -133,6 +140,7 @@ export function useBookPdfUpload({
       meetingTitlePatternInput,
       symbolPrefixInput,
       tocRange,
+      bookLanguage,
     ],
   );
 

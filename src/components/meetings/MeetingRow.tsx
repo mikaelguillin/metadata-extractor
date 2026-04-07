@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { meetingTitleFromFields } from "../../lib/meetings/meetingTitlePattern";
+import type { BookLanguage } from "../../types/book";
 import type { MeetingEntry } from "../../types/meeting";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -18,6 +19,7 @@ export function MeetingRow({
   expanded,
   onToggleExpanded,
   meetingTitlePattern,
+  bookLanguage,
   onDelete,
   onAddMeetingAdjacent,
   onUpdateEntry,
@@ -29,6 +31,7 @@ export function MeetingRow({
   expanded: boolean;
   onToggleExpanded: () => void;
   meetingTitlePattern: string;
+  bookLanguage: BookLanguage;
   onDelete: (id: string) => void;
   onAddMeetingAdjacent: MeetingsTableProps["onAddMeetingAdjacent"];
   onUpdateEntry: MeetingsTableProps["onUpdateEntry"];
@@ -158,6 +161,7 @@ export function MeetingRow({
     meetingTitlePattern,
     meetingNumber,
     dateText,
+    bookLanguage,
   );
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

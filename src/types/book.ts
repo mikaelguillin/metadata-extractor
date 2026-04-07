@@ -1,8 +1,13 @@
 import type { MeetingEntry } from "./meeting";
 
+/** Book document language; fixed at creation. Drives default title template and excerpt PDF metadata. */
+export type BookLanguage = "en" | "fr";
+
 export type Book = {
   id: string;
   name: string;
+  /** Set when the book is created; existing data without this field is treated as French. */
+  language: BookLanguage;
   /** Prepended to each entry’s meeting number to form `MeetingEntry.symbol`. */
   symbolPrefix: string;
   /**

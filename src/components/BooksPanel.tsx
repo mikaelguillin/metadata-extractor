@@ -1,6 +1,6 @@
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
-import type { Book } from "../types/book";
+import type { Book, BookLanguage } from "../types/book";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,7 +16,7 @@ type BooksPanelProps = {
   books: Book[];
   selectedBookId: string | null;
   onSelect: (id: string) => void;
-  onAdd: (name: string) => void;
+  onAdd: (name: string, language: BookLanguage) => void;
   onRename: (id: string, name: string) => void;
   onDelete: (id: string) => void;
 };
@@ -30,6 +30,7 @@ export function BooksPanel({
   onDelete,
 }: BooksPanelProps) {
   const [name, setName] = useState("");
+  const [language, setLanguage] = useState<BookLanguage>("fr");
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameDraft, setRenameDraft] = useState("");
   const [bookDeleteDialogOpen, setBookDeleteDialogOpen] = useState(false);
@@ -81,7 +82,7 @@ export function BooksPanel({
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) return;
-    onAdd(trimmed);
+    onAdd(trimmed, language);
     setName("");
   };
 
@@ -107,6 +108,26 @@ export function BooksPanel({
               maxLength={200}
               aria-label="Book name"
             />
+            <div className="flex flex-col gap-1">
+              <Label
+                htmlFor="new-book-language"
+                className="text-[0.75rem] font-medium text-muted-foreground"
+              >
+                Language
+              </Label>
+              <select
+                id="new-book-language"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                value={language}
+                onChange={(e) =>
+                  setLanguage(e.target.value as BookLanguage)
+                }
+                aria-label="Book language"
+              >
+                <option value="fr">French</option>
+                <option value="en">English</option>
+              </select>
+            </div>
             <Button type="submit" size="sm">
               Create
             </Button>

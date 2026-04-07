@@ -1,3 +1,4 @@
+import type { BookLanguage } from "../../types/book";
 import type { MeetingEntry } from "../../types/meeting";
 import {
   decrementMeetingNumber,
@@ -19,19 +20,20 @@ export function createAdjacentMeetingEntry(
   placement: AdjacentPlacement,
   symbolPrefix: string,
   rawMeetingTitlePattern: string,
+  language: BookLanguage,
 ): MeetingEntry {
   const meetingNumber =
     placement === "before"
       ? decrementMeetingNumber(anchor.meetingNumber)
       : incrementMeetingNumber(anchor.meetingNumber);
-  const pattern = effectiveMeetingTitlePattern(rawMeetingTitlePattern);
+  const pattern = effectiveMeetingTitlePattern(rawMeetingTitlePattern, language);
   return {
     id: crypto.randomUUID(),
     page: anchor.page,
     meetingNumber,
     symbol: symbolPrefix + meetingNumber,
     dateText: "",
-    meetingTitle: meetingTitleFromFields(pattern, meetingNumber, ""),
+    meetingTitle: meetingTitleFromFields(pattern, meetingNumber, "", language),
     description: "",
   };
 }

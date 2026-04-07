@@ -17,7 +17,7 @@ import {
   computeTocRange,
   computeTocRangeHint,
 } from "../lib/tocRange";
-import type { Book } from "../types/book";
+import type { Book, BookLanguage } from "../types/book";
 import type { MeetingEntry } from "../types/meeting";
 import { appToastManager } from "@/lib/appToast";
 
@@ -53,6 +53,7 @@ function initialTocEnd(book: Book | null): string {
 }
 
 export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
+  const bookLang: BookLanguage = book?.language ?? "fr";
   const [excerptDownloadingId, setExcerptDownloadingId] = useState<
     string | null
   >(null);
@@ -98,6 +99,7 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
     tocRange,
     symbolPrefixInput,
     meetingTitlePatternInput,
+    bookLanguage: bookLang,
     patchBook,
   });
 
@@ -136,8 +138,12 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
         patternPatchTimerRef.current = null;
         const b = bookRef.current;
         if (!b || b.id !== bookId) return;
-        const nextPattern = effectiveMeetingTitlePattern(rawInput);
-        const bookPattern = effectiveMeetingTitlePattern(b.meetingTitlePattern);
+        const lang = b.language ?? "fr";
+        const nextPattern = effectiveMeetingTitlePattern(rawInput, lang);
+        const bookPattern = effectiveMeetingTitlePattern(
+          b.meetingTitlePattern,
+          lang,
+        );
         if (nextPattern === bookPattern) return;
         patchBook(bookId, {
           meetingTitlePattern: nextPattern,
@@ -147,6 +153,7 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
               nextPattern,
               e.meetingNumber,
               e.dateText,
+              lang,
             ),
           })),
         });
@@ -206,6 +213,7 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
       placement,
       symbolPrefixInput,
       book.meetingTitlePattern,
+      bookLang,
     );
     const next = [
       ...book.entries.slice(0, insertIndex),
@@ -223,7 +231,10 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
   ) => {
     if (!bookId || !book) return;
     const prefix = symbolPrefixInput;
-    const pattern = effectiveMeetingTitlePattern(book.meetingTitlePattern);
+    const pattern = effectiveMeetingTitlePattern(
+      book.meetingTitlePattern,
+      bookLang,
+    );
     const next = book.entries.map((entry) => {
       if (entry.id !== id) return entry;
       const merged = { ...entry };
@@ -245,6 +256,7 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
           pattern,
           merged.meetingNumber,
           merged.dateText,
+          bookLang,
         );
       }
       return merged;
@@ -287,6 +299,7 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
           tocPageEnd: book.tocPageEnd,
           entries: book.entries,
           entryId,
+          language: bookLang,
         });
         appToastManager.update(toastId, {
           type: "success",
@@ -307,7 +320,7 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
         setExcerptDownloadingId(null);
       }
     },
-    [book, bookId],
+    [book, bookId, bookLang],
   );
 
   const entries = book?.entries ?? [];
@@ -344,7 +357,9 @@ export function BookWorkspace({ book, bookId, patchBook }: BookWorkspaceProps) {
         entries={entries}
         meetingTitlePattern={effectiveMeetingTitlePattern(
           meetingTitlePatternInput,
+          bookLang,
         )}
+        bookLanguage={bookLang}
         emptyMessage={emptyTableMessage}
         pdfDropZone={!!bookId && !book?.pdfFileName}
         uploadDisabled={uploadDisabled}

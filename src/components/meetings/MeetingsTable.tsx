@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import type { BookLanguage } from "@/types/book";
 import { MeetingEntry } from "@/types/meeting";
 import { MeetingRow } from "./MeetingRow";
 import { PdfUploadDropZone } from "./PdfUploadDropZone";
@@ -8,6 +9,7 @@ import { Button } from "@/components/ui/button";
 export type MeetingsTableProps = {
   entries: MeetingEntry[];
   meetingTitlePattern: string;
+  bookLanguage: BookLanguage;
   emptyMessage: string;
   /** When true and there are no rows, show drag-and-drop PDF upload instead of plain text. */
   pdfDropZone?: boolean;
@@ -34,6 +36,7 @@ export type MeetingsTableProps = {
 export function MeetingsTable({
   entries,
   meetingTitlePattern,
+  bookLanguage,
   emptyMessage,
   pdfDropZone = false,
   uploadDisabled = false,
@@ -109,6 +112,7 @@ export function MeetingsTable({
               });
             }}
             meetingTitlePattern={meetingTitlePattern}
+            bookLanguage={bookLanguage}
             onDelete={onDelete}
             onAddMeetingAdjacent={onAddMeetingAdjacent}
             onUpdateEntry={onUpdateEntry}

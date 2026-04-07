@@ -1,6 +1,7 @@
+import type { BookLanguage } from "../../types/book";
 import type { MeetingEntry, FlatTextItem } from "../../types/meeting";
 import {
-  DEFAULT_MEETING_TITLE_PATTERN,
+  DEFAULT_MEETING_TITLE_PATTERN_FR,
   meetingTitleFromFields,
 } from "./meetingTitlePattern";
 import {
@@ -8,8 +9,8 @@ import {
   needsSpaceBetween,
   isNoiseLine,
   isMeetingLine,
-  isFrenchDate,
-  stripFrenchTimeFromDate,
+  isTocDateLine,
+  stripTocDateTimeSuffix,
   stripTrailingTocLeaders,
   extractMeetingNumber,
 } from "./lineHeuristics";
@@ -20,7 +21,8 @@ export function buildMeetings(
     items: FlatTextItem[];
   }[],
   symbolPrefix = "",
-  meetingTitlePattern = DEFAULT_MEETING_TITLE_PATTERN,
+  meetingTitlePattern = DEFAULT_MEETING_TITLE_PATTERN_FR,
+  language: BookLanguage = "fr",
 ): MeetingEntry[] {
   const meetings: MeetingEntry[] = [];
 
@@ -41,9 +43,10 @@ export function buildMeetings(
           meetingTitlePattern,
           currentMeetingNumber,
           currentDate,
+          language,
         ),
         description: currentDescription
-          .filter((line) => !isFrenchDate(line))
+          .filter((line) => !isTocDateLine(line, language))
           .join("\n")
           .trim(),
       });
@@ -78,7 +81,9 @@ export function buildMeetings(
     }
     if (buffer) logicalLines.push(buffer);
 
-    const filteredLines = logicalLines.filter((line) => !isNoiseLine(line));
+    const filteredLines = logicalLines.filter(
+      (line) => !isNoiseLine(line, language),
+    );
 
     for (let i = 0; i < filteredLines.length; i++) {
       const line = filteredLines[i].trim();
@@ -86,16 +91,18 @@ export function buildMeetings(
       const prevLine = filteredLines[i - 1]?.trim() ?? "";
 
       if (
-        isMeetingLine(line) &&
-        (isFrenchDate(nextLine) || isFrenchDate(prevLine))
+        isMeetingLine(line, language) &&
+        (isTocDateLine(nextLine, language) || isTocDateLine(prevLine, language))
       ) {
         flush();
-        const n = extractMeetingNumber(line);
+        const n = extractMeetingNumber(line, language);
         currentMeetingNumber = n.length > 0 ? n : line.trim();
-        const rawDate = isFrenchDate(nextLine) ? nextLine : prevLine;
-        currentDate = stripFrenchTimeFromDate(rawDate);
+        const rawDate = isTocDateLine(nextLine, language)
+          ? nextLine
+          : prevLine;
+        currentDate = stripTocDateTimeSuffix(rawDate, language);
         currentPage = page.page;
-        if (isFrenchDate(nextLine)) {
+        if (isTocDateLine(nextLine, language)) {
           i++;
         }
         continue;

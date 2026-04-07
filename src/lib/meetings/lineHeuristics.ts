@@ -1,3 +1,4 @@
+import type { BookLanguage } from "../../types/book";
 import type { FlatTextItem } from "../../types/meeting";
 
 /** PDF user space: y increases upward, so larger y = higher on the page (read first). */
@@ -24,24 +25,37 @@ export function needsSpaceBetween(
   return true;
 }
 
-export function isNoiseLine(text: string): boolean {
+export function isNoiseLine(text: string, language: BookLanguage): boolean {
   const trimmed = text.trim();
   if (!trimmed) return true;
   if (/^\d+$/.test(trimmed)) return true;
-  // French “table of contents” heading in source PDFs (must match document text).
-  if (/^Table des matières$/i.test(trimmed)) return true;
+  if (language === "en") {
+    if (/^Table of contents$/i.test(trimmed)) return true;
+  } else {
+    if (/^Table des matières$/i.test(trimmed)) return true;
+  }
   if (/^Pages?$/i.test(trimmed)) return true;
   return false;
 }
 
-export function isMeetingLine(text: string): boolean {
+/** French: leading digits (two-digit run at line start after compacting). English: “286th meeting” (word “meeting” is case-insensitive). */
+export function isMeetingLine(text: string, language: BookLanguage): boolean {
+  const trimmed = text.trim();
+  if (language === "en") {
+    return /^\d+(?:st|nd|rd|th)\s+meeting\b/i.test(trimmed);
+  }
   const compact = text.replace(/\s+/g, "").toLowerCase();
   return /^\d+$/.test(compact.substring(0, 2));
 }
 
-/** Leading meeting ordinal from a TOC line (French UN-style wording), e.g. "278ÈME SÉANCE" → "278". */
-export function extractMeetingNumber(text: string): string {
-  const m = text.trim().match(/^(\d+)/);
+/** Leading meeting index: French from line start digits; English from before ordinal suffix. */
+export function extractMeetingNumber(text: string, language: BookLanguage): string {
+  const trimmed = text.trim();
+  if (language === "en") {
+    const m = trimmed.match(/^(\d+)(?:st|nd|rd|th)\b/i);
+    return m?.[1] ?? "";
+  }
+  const m = trimmed.match(/^(\d+)/);
   return m?.[1] ?? "";
 }
 
@@ -85,21 +99,35 @@ export function stripTrailingTocLeaders(text: string): string {
   return text.replace(/(\.\s | \.){4,}.*$/, "").trimEnd();
 }
 
-export function isFrenchDate(text: string): boolean {
+const ENGLISH_MONTHS =
+  /\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\b/i;
+
+const FRENCH_MONTHS =
+  /janvier|février|fevrier|mars|avril|mai|juin|juillet|août|aout|septembre|octobre|novembre|décembre|decembre/i;
+
+/** True if the line looks like a ToC date line (French month names or English month names + year). */
+export function isTocDateLine(text: string, language: BookLanguage): boolean {
   const trimmed = text.trim();
   if (!trimmed) return false;
 
-  const monthsRegex =
-    /janvier|février|fevrier|mars|avril|mai|juin|juillet|août|aout|septembre|octobre|novembre|décembre|decembre/i;
-
+  const monthsRegex = language === "en" ? ENGLISH_MONTHS : FRENCH_MONTHS;
   const hasMonth = monthsRegex.test(trimmed);
   const hasYear = /\d{4}/.test(trimmed);
 
   return hasMonth && hasYear;
 }
 
-/** Strip trailing time-of-day from French-format dates (e.g. ", à 11 h. 30" or " à 11 h. 30"). */
-export function stripFrenchTimeFromDate(text: string): string {
+/** Remove trailing time-of-day from a ToC date line (French “à … h.” or English “at … a.m.”). */
+export function stripTocDateTimeSuffix(
+  text: string,
+  language: BookLanguage,
+): string {
+  if (language === "en") {
+    return text
+      .replace(/,\s*at\s+.+$/iu, "")
+      .replace(/\s+at\s+.+$/iu, "")
+      .trim();
+  }
   return text
     .replace(/,\s*à\s+.+$/iu, "")
     .replace(/\s+à\s+\d{1,2}\s*h\.?\s*\d{0,2}\s*$/iu, "")

@@ -28,7 +28,7 @@ export const App: React.FC = () => {
             books={books}
             selectedBookId={selectedBookId}
             onSelect={selectBook}
-            onAdd={addBook}
+            onAdd={(name, language) => addBook(name, language)}
             onRename={(id, nextName) => patchBook(id, { name: nextName })}
             onDelete={deleteBook}
           />

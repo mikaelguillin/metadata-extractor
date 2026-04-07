@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  DEFAULT_MEETING_TITLE_PATTERN,
+  defaultMeetingTitlePatternForLanguage,
   DEFAULT_SYMBOL_PREFIX,
   effectiveMeetingTitlePattern,
   meetingTitleFromFields,
 } from "../lib/meetings/meetingTitlePattern";
 import { deletePdfBlob } from "../lib/storage/pdfBlobStore";
-import type { Book } from "../types/book";
+import type { Book, BookLanguage } from "../types/book";
 import type { MeetingEntry } from "../types/meeting";
 
 const STORAGE_KEY = "metadataExtractorBooks";
@@ -37,12 +37,15 @@ export function usePersistedBooks() {
       }
       const symbolPrefixDefault = DEFAULT_SYMBOL_PREFIX;
       const books = parsed.books.map((b) => {
+        const language: BookLanguage = b.language ?? "fr";
         const symbolPrefix = b.symbolPrefix ?? symbolPrefixDefault;
         const meetingTitlePattern = effectiveMeetingTitlePattern(
           b.meetingTitlePattern ?? "",
+          language,
         );
         return {
           ...b,
+          language,
           symbolPrefix,
           meetingTitlePattern,
           pdfBlobKey: b.pdfBlobKey ?? null,
@@ -61,6 +64,7 @@ export function usePersistedBooks() {
               meetingTitlePattern,
               meetingNumber,
               dateText,
+              language,
             );
             return {
               id: String(row.id ?? ""),
@@ -88,13 +92,14 @@ export function usePersistedBooks() {
   }, []);
 
   const addBook = useCallback(
-    (name: string) => {
+    (name: string, language: BookLanguage) => {
       const id = crypto.randomUUID();
       const book: Book = {
         id,
         name,
+        language,
         symbolPrefix: DEFAULT_SYMBOL_PREFIX,
-        meetingTitlePattern: DEFAULT_MEETING_TITLE_PATTERN,
+        meetingTitlePattern: defaultMeetingTitlePatternForLanguage(language),
         pdfFileName: null,
         pdfBlobKey: null,
         tocPageStart: null,
