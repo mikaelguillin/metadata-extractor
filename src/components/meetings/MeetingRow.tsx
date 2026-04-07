@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { MeetingsTableProps } from "@/components/meetings/MeetingsTable";
 import { MeetingRowActions } from "@/components/meetings/MeetingRowActions";
+import { MeetingRowFooter, useMeetingRowSavedAck } from "@/components/meetings/MeetingRowFooter";
 import { MeetingRowForm } from "@/components/meetings/MeetingRowForm";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -47,6 +48,18 @@ export function MeetingRow({
   descriptionRef.current = description;
 
   const restDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [debounceScheduled, setDebounceScheduled] = useState(false);
+  const [showSavedAck, triggerSavedAck] = useMeetingRowSavedAck();
+
+  const isDirty =
+    meetingNumber.trim() !== entry.meetingNumber.trim() ||
+    dateText.trim() !== entry.dateText.trim() ||
+    description.trim() !== entry.description.trim();
+
+  const canPersist =
+    !!meetingNumber.trim() &&
+    !!dateText.trim() &&
+    !!description.trim();
 
   useEffect(() => {
     setMeetingNumber(entry.meetingNumber);
@@ -66,12 +79,19 @@ export function MeetingRow({
       clearTimeout(restDebounceRef.current);
       restDebounceRef.current = null;
     }
+    setDebounceScheduled(false);
   }, []);
+
+  useEffect(() => {
+    if (!isDirty) flushRestDebounced();
+  }, [isDirty, flushRestDebounced]);
 
   const scheduleRestSave = useCallback(() => {
     flushRestDebounced();
+    setDebounceScheduled(true);
     restDebounceRef.current = setTimeout(() => {
       restDebounceRef.current = null;
+      setDebounceScheduled(false);
       const num = meetingNumberRef.current;
       const d = dateRef.current;
       const desc = descriptionRef.current;
@@ -87,6 +107,7 @@ export function MeetingRow({
         dateText: d,
         description: desc,
       });
+      triggerSavedAck();
     }, SAVE_DEBOUNCE_MS);
   }, [
     entry.meetingNumber,
@@ -95,6 +116,7 @@ export function MeetingRow({
     entry.id,
     flushRestDebounced,
     onUpdateEntry,
+    triggerSavedAck,
   ]);
 
   const handleBlurRest = useCallback(() => {
@@ -116,6 +138,7 @@ export function MeetingRow({
       dateText: d,
       description: desc,
     });
+    triggerSavedAck();
   }, [
     entry.meetingNumber,
     entry.dateText,
@@ -123,6 +146,7 @@ export function MeetingRow({
     entry.id,
     flushRestDebounced,
     onUpdateEntry,
+    triggerSavedAck,
   ]);
 
   const meetingNoId = `meeting-no-${entry.id}`;
@@ -161,7 +185,7 @@ export function MeetingRow({
       <Card
         size="sm"
         className={cn(
-          "relative gap-0 sm:flex-row sm:items-start",
+          "relative flex flex-col gap-0",
           expanded && "pt-10",
         )}
       >
@@ -177,40 +201,48 @@ export function MeetingRow({
           </div>
         ) : (
           <>
-            <MeetingRowForm
-              symbol={entry.symbol}
-              meetingNoId={meetingNoId}
-              dateId={dateId}
-              titleId={titleId}
-              descId={descId}
-              meetingNumber={meetingNumber}
-              dateText={dateText}
-              description={description}
-              displayedTitle={displayedTitle}
-              onMeetingNumberChange={(value) => {
-                setMeetingNumber(value);
-                scheduleRestSave();
-              }}
-              onDateChange={(value) => {
-                setDateText(value);
-                scheduleRestSave();
-              }}
-              onDescriptionChange={(value) => {
-                setDescription(value);
-                scheduleRestSave();
-              }}
-              onBlurRest={handleBlurRest}
-            />
-            <MeetingRowActions
-              meetingId={entry.id}
-              excerptDownloadEnabled={excerptDownloadEnabled}
-              excerptDownloading={excerptDownloading}
-              onDownloadExcerpt={onDownloadExcerpt}
-              onAddMeetingAdjacent={onAddMeetingAdjacent}
-              onDeleteClick={() => {
-                flushRestDebounced();
-                setDeleteDialogOpen(true);
-              }}
+            <div className="flex flex-1 flex-col gap-0 sm:flex-row sm:items-start">
+              <MeetingRowForm
+                symbol={entry.symbol}
+                meetingNoId={meetingNoId}
+                dateId={dateId}
+                titleId={titleId}
+                descId={descId}
+                meetingNumber={meetingNumber}
+                dateText={dateText}
+                description={description}
+                displayedTitle={displayedTitle}
+                onMeetingNumberChange={(value) => {
+                  setMeetingNumber(value);
+                  scheduleRestSave();
+                }}
+                onDateChange={(value) => {
+                  setDateText(value);
+                  scheduleRestSave();
+                }}
+                onDescriptionChange={(value) => {
+                  setDescription(value);
+                  scheduleRestSave();
+                }}
+                onBlurRest={handleBlurRest}
+              />
+              <MeetingRowActions
+                meetingId={entry.id}
+                excerptDownloadEnabled={excerptDownloadEnabled}
+                excerptDownloading={excerptDownloading}
+                onDownloadExcerpt={onDownloadExcerpt}
+                onAddMeetingAdjacent={onAddMeetingAdjacent}
+                onDeleteClick={() => {
+                  flushRestDebounced();
+                  setDeleteDialogOpen(true);
+                }}
+              />
+            </div>
+            <MeetingRowFooter
+              isDirty={isDirty}
+              debounceScheduled={debounceScheduled}
+              showSavedAck={showSavedAck}
+              canPersist={canPersist}
             />
           </>
         )}
