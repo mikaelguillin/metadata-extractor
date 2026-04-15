@@ -100,7 +100,7 @@ export function buildMeetings(
         const rawDate = isTocDateLine(nextLine, language)
           ? nextLine
           : prevLine;
-        currentDate = stripTocDateTimeSuffix(rawDate, language);
+        currentDate = stripTocDateTimeSuffix(rawDate, language).toLowerCase();
         currentPage = page.page;
         if (isTocDateLine(nextLine, language)) {
           i++;
