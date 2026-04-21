@@ -84,7 +84,8 @@ export async function downloadMeetingExcerptPdf(params: {
     language === "en" ? "United Nations" : "Nations Unies",
   );
   outPdf.setSubject(entry.description);
-  outPdf.setProducer("pdf-lib");
+  outPdf.setProducer("Adobe Acrobat (64-bit) 25");
+  outPdf.setCreator("Opus FreeFlow & Workflow by the DLSG at Image Access, Inc.");
   outPdf.setCustomMetadata(
     "Language",
     language === "en" ? "English" : "French",
